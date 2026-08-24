@@ -21,29 +21,34 @@ export interface TrackInfo {
 }
 
 export interface CassetteData {
-  id: string; // e.g. "90s-evergreen-001"
+  id: string;
   title: string;
   film?: string;
   artists?: string[];
   subtitle?: string;
   description: string;
   hindiTitle?: string;
-  source: string; // e.g. "Tips Official"
-  category?: '1980s' | '1990s' | '2000s' | 'Artist' | 'Mood' | '90s Evergreen' | string;
+  source: string; // e.g. "T-Series Bollywood Classics"
+  section_id?: '80s-90s' | '90s-2000s' | string;
+  section_title?: string;
+  category?: '1980s' | '1990s' | '2000s' | 'Artist' | 'Mood' | '80s–90s Golden Hits' | '90s–2000s Evergreen Hits' | string;
   era: '1980s' | '1990s' | '2000s';
   yearRange: string;
   moods: Mood[];
   type?: 'youtube-video' | 'youtube-playlist' | 'video' | 'playlist';
   youtube_video_id?: string;
-  youtubeVideoId?: string; // CamelCase alias
-  youtubeId?: string; // Legacy alias
+  youtubeVideoId?: string;
+  youtubeId?: string;
   youtube_url?: string;
   youtubeUrl?: string | null;
   youtubePlaylistId?: string | null;
   channel_name?: string;
   channel_url?: string;
   is_individual_video?: boolean;
+  contains_individual_videos?: boolean;
+  use_for?: string;
   verified_official?: boolean;
+  official?: boolean;
   status?: string;
   trackCount: number;
   durationApprox: string;

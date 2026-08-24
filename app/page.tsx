@@ -243,6 +243,8 @@ export default function Home() {
       {/* Hero Section with Delux Music Player */}
       <HeroSection
         cassette={loadedCassette}
+        allCassettes={cassettes}
+        onSelectCassette={handleSelectCassette}
         playbackStatus={playbackStatus}
         currentTime={currentTime}
         duration={duration}
