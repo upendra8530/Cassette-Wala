@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Play,
   Pause,
@@ -13,8 +13,6 @@ import {
   Heart,
   BookOpen,
   Disc3,
-  ListMusic,
-  ChevronDown,
 } from 'lucide-react';
 import { CassetteData, PlaybackStatus } from '@/lib/types';
 import { CASSETTE_SECTIONS } from '@/data/playlists';
@@ -72,11 +70,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const [onlineCount, setOnlineCount] = useState(1284);
   const [activeSectionId, setActiveSectionId] = useState<'80s-90s' | '90s-2000s'>('80s-90s');
-  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+  const [vuLevel, setVuLevel] = useState({ left: 45, right: 50 });
 
   const isPlaying = playbackStatus === 'playing';
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+  // Mechanical Tape Counter (000 to 999 based on current time)
+  const tapeCounter = Math.min(999, Math.floor((currentTime % 3600) / 3))
+    .toString()
+    .padStart(3, '0');
+
+  // Fluctuating online listeners
   useEffect(() => {
     const interval = setInterval(() => {
       setOnlineCount((prev) => prev + (Math.floor(Math.random() * 5) - 2));
@@ -90,6 +94,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       setActiveSectionId(cassette.section_id as '80s-90s' | '90s-2000s');
     }
   }, [cassette]);
+
+  // Analog VU meter needle bounce simulation
+  useEffect(() => {
+    if (!isPlaying) {
+      setVuLevel({ left: 10, right: 12 });
+      return;
+    }
+    const interval = setInterval(() => {
+      setVuLevel({
+        left: Math.floor(Math.random() * 45 + 35),
+        right: Math.floor(Math.random() * 48 + 32),
+      });
+    }, 140);
+    return () => clearInterval(interval);
+  }, [isPlaying]);
 
   const handlePlayToggle = () => {
     if (isPlaying) {
@@ -106,8 +125,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   );
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-between items-center py-5 sm:py-6 px-3 sm:px-6 select-none">
-      {/* Top Floating Controls Row */}
+    <div className="relative min-h-screen w-full flex flex-col justify-between items-center py-4 sm:py-6 px-3 sm:px-6 select-none">
+      {/* Top Floating Action Row */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -124,7 +143,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </span>
         </div>
 
-        {/* Center/Right: Ambient & Action Tweak Pills */}
+        {/* Right: Ambient & Action Tweak Pills */}
         <div className="flex items-center gap-1.5 xs:gap-2">
           {onToggleRain && (
             <button
@@ -184,28 +203,136 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
       </motion.div>
 
-      {/* Centerpiece: Nostalgic Cassette Shop Atmosphere & Player */}
-      <div className="flex-1 w-full max-w-3xl flex flex-col items-center justify-center my-auto py-4 sm:py-6">
-        {/* Brand Stamp with Logo */}
+      {/* Centerpiece: Vintage Cassette Start Banner & Deck */}
+      <div className="flex-1 w-full max-w-4xl flex flex-col items-center justify-center my-auto py-4">
+        {/* =========================================================
+            AUTHENTIC VINTAGE CASSETTE START BANNER & DECK HEADER
+           ========================================================= */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/50 border border-white/20 backdrop-blur-md mb-3 shadow-lg"
+          transition={{ duration: 0.6 }}
+          className="cassette-start-banner w-full max-w-3xl p-4 sm:p-6 mb-4 relative"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/favicon-32.png"
-            alt="Cassette Wala"
-            className="w-5 h-5 rounded-md object-cover border border-amber-400/40"
-          />
-          <span className="font-hindi text-amber-300 font-bold text-sm">
-            कैसेट वाला
-          </span>
-          <span className="text-white/40 text-xs">•</span>
-          <span className="font-mono text-[10px] text-white/70">
-            T-SERIES OFFICIAL
-          </span>
+          {/* Corner Screws */}
+          <div className="absolute top-2.5 left-2.5 w-2 h-2 rounded-full bg-stone-700 border border-stone-500 shadow-inner flex items-center justify-center">
+            <div className="w-1 h-0.5 bg-stone-400" />
+          </div>
+          <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-stone-700 border border-stone-500 shadow-inner flex items-center justify-center">
+            <div className="w-1 h-0.5 bg-stone-400" />
+          </div>
+          <div className="absolute bottom-2.5 left-2.5 w-2 h-2 rounded-full bg-stone-700 border border-stone-500 shadow-inner flex items-center justify-center">
+            <div className="w-1 h-0.5 bg-stone-400" />
+          </div>
+          <div className="absolute bottom-2.5 right-2.5 w-2 h-2 rounded-full bg-stone-700 border border-stone-500 shadow-inner flex items-center justify-center">
+            <div className="w-1 h-0.5 bg-stone-400" />
+          </div>
+
+          {/* Magnetic Tape Leader Stripe Header */}
+          <div className="cassette-leader-tape rounded-full mb-3 shadow-sm" />
+
+          {/* Top Tape Leader Meta Row */}
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-amber-300/80 border-b border-amber-500/20 pb-2 mb-4 px-1">
+            <div className="flex items-center gap-2">
+              <span className="px-1.5 py-0.5 rounded bg-red-950 border border-red-500/40 text-red-300 font-bold">
+                SIDE A
+              </span>
+              <span className="font-bold tracking-wider text-amber-200">
+                ★ STEREO ★ HIGH OUTPUT C-90
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Mechanical Tape Counter */}
+              <div className="flex items-center gap-1 bg-black/80 px-2 py-0.5 rounded border border-stone-700 shadow-inner">
+                <span className="text-[9px] text-stone-400">INDEX</span>
+                <span className="font-mono text-amber-400 font-bold tracking-widest text-xs">
+                  {tapeCounter}
+                </span>
+              </div>
+
+              {/* Status LED */}
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isPlaying
+                      ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)] animate-pulse'
+                      : 'bg-red-700'
+                  }`}
+                />
+                <span className="text-[9px] text-white/60 font-bold hidden xs:inline">
+                  {isPlaying ? 'PLAYBACK' : 'STOP'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* PROMINENT HIGH-RES LOGO BANNER (Full, Crisp & High-Resolution) */}
+          <div className="w-full flex flex-col items-center justify-center my-2 sm:my-3">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+              className="relative w-full max-w-[340px] sm:max-w-[440px] md:max-w-[500px] flex items-center justify-center p-2 rounded-2xl bg-black/30 border border-amber-500/20 shadow-2xl overflow-hidden"
+            >
+              {/* Warm Backlight Glow */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-amber-600/10 via-red-600/15 to-amber-600/10 blur-md" />
+              
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.png"
+                alt="Cassette Wala Logo Banner"
+                className="relative z-10 w-full h-auto max-h-[140px] sm:max-h-[170px] md:max-h-[200px] object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.85)]"
+              />
+            </motion.div>
+
+            {/* Nostalgic Tagline */}
+            <p className="mt-2.5 font-hindi text-lg sm:text-2xl text-amber-300 font-bold text-center tracking-wide">
+              &ldquo;हर कैसेट में एक याद है&rdquo;
+            </p>
+          </div>
+
+          {/* Dual Analog Dancing VU Meters */}
+          <div className="mt-3 pt-3 border-t border-amber-500/20 grid grid-cols-2 gap-3 sm:gap-6 px-2">
+            {/* Left VU Meter */}
+            <div className="bg-black/70 border border-stone-800 rounded-xl p-2 flex flex-col items-center justify-between shadow-inner">
+              <div className="w-full flex justify-between text-[8px] font-mono text-stone-400 px-1">
+                <span>-20</span>
+                <span>-10</span>
+                <span>-5</span>
+                <span>0</span>
+                <span className="text-red-500">+3</span>
+              </div>
+              <div className="w-full h-2 bg-stone-900 rounded-full my-1.5 overflow-hidden p-0.5 border border-stone-800">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 rounded-full transition-all duration-100"
+                  style={{ width: `${isPlaying ? vuLevel.left : 8}%` }}
+                />
+              </div>
+              <span className="text-[8px] font-mono text-stone-500 uppercase tracking-wider font-bold">
+                LEFT CHANNEL (बायाँ)
+              </span>
+            </div>
+
+            {/* Right VU Meter */}
+            <div className="bg-black/70 border border-stone-800 rounded-xl p-2 flex flex-col items-center justify-between shadow-inner">
+              <div className="w-full flex justify-between text-[8px] font-mono text-stone-400 px-1">
+                <span>-20</span>
+                <span>-10</span>
+                <span>-5</span>
+                <span>0</span>
+                <span className="text-red-500">+3</span>
+              </div>
+              <div className="w-full h-2 bg-stone-900 rounded-full my-1.5 overflow-hidden p-0.5 border border-stone-800">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 rounded-full transition-all duration-100"
+                  style={{ width: `${isPlaying ? vuLevel.right : 10}%` }}
+                />
+              </div>
+              <span className="text-[8px] font-mono text-stone-500 uppercase tracking-wider font-bold">
+                RIGHT CHANNEL (दायाँ)
+              </span>
+            </div>
+          </div>
         </motion.div>
 
         {/* Section Tabs (80s–90s Golden Hits & 90s–2000s Evergreen Hits) */}
@@ -223,7 +350,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     onSelectCassette(firstTape);
                   }
                 }}
-                className={`px-3 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   isSelected
                     ? 'bg-amber-500 text-black font-bold shadow-[0_0_14px_rgba(245,158,11,0.5)]'
                     : 'text-white/70 hover:text-white hover:bg-white/10'
@@ -236,7 +363,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* Cassette / Playlist Selector Pill List */}
-        <div className="flex flex-wrap items-center justify-center gap-1.5 my-2 max-w-xl">
+        <div className="flex flex-wrap items-center justify-center gap-1.5 my-2 max-w-2xl">
           {activeSectionPlaylists.map((tape) => {
             const isLoaded = cassette?.id === tape.id;
             return (
@@ -253,37 +380,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 }`}
               >
                 <Disc3 className={`w-3 h-3 ${isLoaded && isPlaying ? 'animate-spin text-amber-400' : ''}`} />
-                <span className="truncate max-w-[170px] sm:max-w-[200px]">{tape.title}</span>
+                <span className="truncate max-w-[170px] sm:max-w-[210px]">{tape.title}</span>
               </button>
             );
           })}
         </div>
-
-        {/* Main Editorial Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="font-display text-4xl sm:text-6xl text-white tracking-tight leading-[1.1] text-center mt-2"
-        >
-          Cassette Wala
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="mt-1 font-hindi text-xl sm:text-2xl text-amber-300 font-bold text-center"
-        >
-          &ldquo;हर कैसेट में एक याद है&rdquo;
-        </motion.p>
 
         {/* Delux Salon-Style Floating Music Player Strip */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="w-full max-w-xl mt-5"
+          className="w-full max-w-xl mt-4"
         >
           <div className="music-player mx-auto">
             {/* Spinning Cassette Spool Disc Hub */}
