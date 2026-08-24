@@ -117,7 +117,11 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
     useEffect(() => {
       if (!isApiReady || !containerRef.current || isReady) return;
 
-      const initialVideoId = cassette?.youtubeId || 'ePSzjF0WzSg';
+      const initialVideoId =
+        cassette?.youtube_video_id ||
+        cassette?.youtubeVideoId ||
+        cassette?.youtubeId ||
+        'kYv9iD09Sg4';
 
       try {
         playerRef.current = new window.YT.Player(containerRef.current, {
@@ -199,7 +203,11 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
             index: 0,
           });
         } else {
-          const videoIdToLoad = cassette.youtubeId || 'ePSzjF0WzSg';
+          const videoIdToLoad =
+            cassette.youtube_video_id ||
+            cassette.youtubeVideoId ||
+            cassette.youtubeId ||
+            'kYv9iD09Sg4';
           if (isPlaying) {
             player.loadVideoById({ videoId: videoIdToLoad });
           } else {
