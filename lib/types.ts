@@ -21,19 +21,22 @@ export interface TrackInfo {
 }
 
 export interface CassetteData {
-  id: string;
+  id: string; // e.g. "cassette-01"
   title: string;
-  subtitle: string;
+  subtitle?: string;
   description: string;
   hindiTitle?: string;
+  source: string; // e.g. "T-Series Bollywood Classics", "Tips Official"
+  category?: '1980s' | '1990s' | '2000s' | 'Artist' | 'Mood' | string;
   era: '1980s' | '1990s' | '2000s';
   yearRange: string;
   moods: Mood[];
-  type: 'video' | 'playlist';
-  youtubeId?: string; // For single video jukebox
-  youtubePlaylistId?: string; // For YouTube playlist
-  youtubeUrl: string;
-  source: string; // e.g. "T-Series Bollywood Classics", "Tips Official"
+  type: 'youtube-video' | 'youtube-playlist' | 'video' | 'playlist';
+  youtubeVideoId?: string; // Standard video ID
+  youtubeId?: string; // Legacy alias
+  youtubePlaylistId?: string | null;
+  youtubeUrl?: string | null;
+  status?: string;
   trackCount: number;
   durationApprox: string;
   sideA: string[];

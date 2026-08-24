@@ -137,7 +137,7 @@ export default function Home() {
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchesTitle = tape.title.toLowerCase().includes(q);
-        const matchesSubtitle = tape.subtitle.toLowerCase().includes(q);
+        const matchesSubtitle = tape.subtitle?.toLowerCase().includes(q) || false;
         const matchesHindi = tape.hindiTitle?.toLowerCase().includes(q) || false;
         const matchesDesc = tape.description.toLowerCase().includes(q);
         const matchesSource = tape.source.toLowerCase().includes(q);
