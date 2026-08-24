@@ -6,7 +6,6 @@ import { CassetteData, Era, Mood, PlaybackStatus } from '@/lib/types';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { HeroSection } from '@/components/ui/HeroSection';
-import { EraSelector } from '@/components/ui/EraSelector';
 import { MoodSelector } from '@/components/ui/MoodSelector';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { ShopAtmosphere } from '@/components/ui/ShopAtmosphere';
@@ -350,15 +349,6 @@ export default function Home() {
             if (!loadedCassette?.tracksDetailed || loadedCassette.tracksDetailed.length === 0) {
               setCurrentTrackName(trackTitle);
             }
-          }}
-        />
-
-        {/* Pick Your Era Section */}
-        <EraSelector
-          selectedEra={selectedEra}
-          onSelectEra={(era) => {
-            setSelectedEra(era);
-            handleScrollToShelf();
           }}
         />
 

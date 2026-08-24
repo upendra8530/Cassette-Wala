@@ -76,37 +76,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               (ESTD. 1982)
             </span>
           </button>
-
-          {/* Era Pills (Desktop) */}
-          <div className="hidden lg:flex items-center gap-1 bg-black/40 p-0.5 rounded-full border border-white/15 backdrop-blur-md">
-            {(['all', '1980s', '1990s', '2000s'] as const).map((era) => {
-              const isSelected = selectedEra === era;
-              const labels = {
-                all: 'All',
-                '1980s': '80s Disco',
-                '1990s': '90s Evergreen',
-                '2000s': '2000s Hits',
-              };
-
-              return (
-                <button
-                  key={era}
-                  onClick={() => {
-                    soundSynth.playSwitchClick();
-                    onSelectEra(era);
-                    onScrollToShelf();
-                  }}
-                  className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
-                    isSelected
-                      ? 'bg-amber-500 text-black font-bold shadow-[0_0_12px_rgba(245,158,11,0.5)]'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {labels[era]}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         {/* 3. Action Tweak Pills (Baarish, Hiss, Surprise, Mixtape, Support) */}
