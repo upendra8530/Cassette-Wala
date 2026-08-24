@@ -61,8 +61,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               soundSynth.playSwitchClick();
               onScrollToShelf();
             }}
-            className="header-pill px-3.5 gap-1.5 hover:border-amber-400/60 hover:text-amber-200"
+            className="header-pill px-2.5 sm:px-3.5 gap-2 hover:border-amber-400/60 hover:text-amber-200"
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/favicon-32.png"
+              alt="Cassette Wala"
+              className="w-5 h-5 rounded-md object-cover border border-amber-400/30"
+            />
             <span className="font-hindi text-amber-400 font-bold text-sm">
               कैसेट वाला
             </span>

@@ -44,6 +44,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://cassettewala.in'),
   title: 'Cassette Wala | Delux 80s, 90s & 2000s Indian Retro Cassette Shop',
   description:
     'Cassette Wala (कैसेट वाला) is a nostalgic Indian retro cassette player and ambient music shop. Explore physical cassette tapes from 80s, 90s & 2000s Bollywood, Kumar Sanu, Udit Narayan, Alka Yagnik, and indie classics.',
@@ -59,6 +60,18 @@ export const metadata: Metadata = {
     'cassettewala.in',
   ],
   authors: [{ name: 'Cassette Wala' }],
+  icons: {
+    icon: [
+      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
+      { url: '/logo.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/favicon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/logo.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: '/favicon-32.png',
+  },
   openGraph: {
     title: 'Cassette Wala | Rewind. Play. Relive.',
     description:
@@ -66,6 +79,14 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_IN',
     siteName: 'Cassette Wala',
+    images: [
+      {
+        url: '/logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Cassette Wala',
+      },
+    ],
   },
 };
 

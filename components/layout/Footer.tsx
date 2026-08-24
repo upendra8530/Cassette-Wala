@@ -10,7 +10,13 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-white/10">
           {/* Col 1: Shop Story */}
           <div className="md:col-span-2 space-y-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/favicon-192.png"
+                alt="Cassette Wala"
+                className="w-8 h-8 rounded-lg object-cover border border-amber-400/40 shadow-md"
+              />
               <span className="font-display text-2xl text-white">
                 Cassette Wala
               </span>
