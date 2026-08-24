@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #120d09;
+  --foreground: #f4eedb;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  background-image: 
+    radial-gradient(ellipse at 50% 0%, rgba(61, 39, 25, 0.4) 0%, rgba(18, 13, 9, 0.95) 75%),
+    linear-gradient(to bottom, #18100b, #120d09);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* Custom Vintage Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #18100b;
+  border-left: 1px solid #3d2719;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #553723;
+  border-radius: 4px;
+  border: 2px solid #18100b;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d99b26;
+}
+
+/* Range input styling for volume and progress sliders */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f3b33a;
+  border: 2px solid #271911;
+  box-shadow: 0 0 6px rgba(243, 179, 58, 0.7);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f3b33a;
+  border: 2px solid #271911;
+  box-shadow: 0 0 6px rgba(243, 179, 58, 0.7);
+  cursor: pointer;
+}
+
+/* Texture patterns */
+.wood-texture {
+  background-color: #271911;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 2px,
+    transparent 2px,
+    transparent 4px
+  );
+}
+
+.paper-texture {
+  background-color: #faf4e6;
+  background-image: radial-gradient(#e5d8be 0.75px, transparent 0.75px);
+  background-size: 12px 12px;
+}
