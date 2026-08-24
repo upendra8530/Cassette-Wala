@@ -2,6 +2,55 @@ import { CassetteData } from '@/lib/types';
 
 export const CASSETTE_PLAYLISTS: CassetteData[] = [
   {
+    id: 'retro-dance-hits-001',
+    category: 'Retro Dance Hits',
+    title: 'Retro Dance Hits',
+    subtitle: 'Nostalgic Bollywood Disco & Dance Hits',
+    hindiTitle: 'रेट्रो डांस और डिस्को हिट्स',
+    description: 'A curated YouTube playlist celebrating the golden disco and retro dance era.',
+    source: 'YouTube Playlist',
+    era: '1980s',
+    yearRange: '1980s - 1990s',
+    moods: ['all', 'party', 'masti'],
+    type: 'youtube-playlist',
+    youtubePlaylistId: 'PLCoMB-USpyxM',
+    youtube_video_id: 'zS5y8a5wkno',
+    youtubeVideoId: 'zS5y8a5wkno',
+    youtubeId: 'zS5y8a5wkno',
+    youtube_url: 'https://youtube.com/playlist?list=PLCoMB-USpyxM&si=qEGkU-YZZ4Iuve68',
+    youtubeUrl: 'https://youtube.com/playlist?list=PLCoMB-USpyxM&si=qEGkU-YZZ4Iuve68',
+    is_individual_video: false,
+    verified_official: true,
+    trackCount: 10,
+    durationApprox: 'Playlist',
+    featuredBadge: 'OFFICIAL PLAYLIST',
+    recordLabel: 'Curated Bollywood Stereo',
+    priceMRP: '₹ 40.00 (M.R.P. Incl. of all taxes)',
+    jCardNotes: 'Retro Dance Hits YouTube playlist loaded directly into the cassette player.',
+    sideA: [
+      '1. Retro Dance Hits (Side A)',
+    ],
+    sideB: [
+      '1. Retro Dance Hits (Side B)',
+    ],
+    tracksDetailed: [
+      {
+        title: 'Retro Dance Hits',
+        duration: 'Playlist',
+        timestampSeconds: 0,
+      },
+    ],
+    coverColor: {
+      base: '#7f1d1d',
+      border: '#f59e0b',
+      accent: '#fef3c7',
+      labelBg: '#fef3c7',
+      labelText: '#1c1917',
+      tapeBody: 'gold',
+      ribbonColor: '#dc2626',
+    },
+  },
+  {
     id: '90s-evergreen-001',
     category: '90s Evergreen',
     title: 'Dil Laga Liya',
@@ -67,20 +116,8 @@ export const ERA_FILTERS = [
     color: '#f59e0b',
     description: 'Explore nostalgic Indian music from Bollywood golden eras.',
   },
-  {
-    id: '1990s',
-    label: '90s Evergreen',
-    tagline: 'दिलकश और यादगार नगमे',
-    years: '1990s - 2000s',
-    icon: '❤️',
-    color: '#b91c1c',
-    description: 'The golden age of cassette shops, Nadeem-Shravan melodies, Alka Yagnik and Udit Narayan duets.',
-  },
 ] as const;
 
 export const MOOD_FILTERS = [
   { id: 'all', label: 'All Moods (सभी रंग)', emoji: '✨' },
-  { id: 'romance', label: 'Romance (इश्क़)', emoji: '❤️' },
-  { id: 'safar', label: 'Safar (सफ़र)', emoji: '🚗' },
-  { id: 'latenight', label: 'Late Night (देर रात)', emoji: '🌙' },
 ] as const;

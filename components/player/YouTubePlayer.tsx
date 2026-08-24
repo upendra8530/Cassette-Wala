@@ -196,7 +196,10 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
       activeCassetteIdRef.current = cassette.id;
 
       try {
-        if (cassette.type === 'playlist' && cassette.youtubePlaylistId) {
+        if (
+          (cassette.type === 'playlist' || cassette.type === 'youtube-playlist') &&
+          cassette.youtubePlaylistId
+        ) {
           player.loadPlaylist({
             list: cassette.youtubePlaylistId,
             listType: 'playlist',
