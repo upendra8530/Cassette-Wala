@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { CASSETTE_PLAYLISTS } from '@/data/playlists';
-import { CassetteData, Era, Mood, PlaybackStatus, AudioSettings } from '@/lib/types';
+import { CassetteData, Era, Mood, PlaybackStatus } from '@/lib/types';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { HeroSection } from '@/components/ui/HeroSection';
@@ -12,16 +12,15 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { ShopAtmosphere } from '@/components/ui/ShopAtmosphere';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { SurpriseMeModal } from '@/components/ui/SurpriseMeModal';
+import { SupportModal } from '@/components/ui/SupportModal';
 import { CassetteShelf } from '@/components/cassette/CassetteShelf';
 import { JCardModal } from '@/components/cassette/JCardModal';
 import { CustomMixtapeModal } from '@/components/cassette/CustomMixtapeModal';
-import { CassettePlayerDeck } from '@/components/player/CassettePlayerDeck';
 import { YouTubePlayer, YouTubePlayerRef } from '@/components/player/YouTubePlayer';
-import { NowPlayingBar } from '@/components/player/NowPlayingBar';
 import { soundSynth } from '@/lib/soundSynth';
 
 export default function Home() {
-  // 1. Initial State
+  // 1. Core State
   const [isLoading, setIsLoading] = useState(true);
   const [cassettes, setCassettes] = useState<CassetteData[]>(CASSETTE_PLAYLISTS);
   const [loadedCassette, setLoadedCassette] = useState<CassetteData | null>(CASSETTE_PLAYLISTS[0]);
@@ -29,44 +28,49 @@ export default function Home() {
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [currentTrackName, setCurrentTrackName] = useState<string>('');
-  const [volume, setVolume] = useState<number>(80);
+  const [volume, setVolume] = useState<number>(100);
   const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [showVideoPreview, setShowVideoPreview] = useState<boolean>(false);
 
-  // 2. Filters & Modals
+  // 2. Atmospheric Toggles
+  const [isRainActive, setIsRainActive] = useState<boolean>(false);
+  const [isTapeHissActive, setIsTapeHissActive] = useState<boolean>(false);
+
+  // 3. Filters & Modals
   const [selectedEra, setSelectedEra] = useState<Era>('all');
   const [selectedMood, setSelectedMood] = useState<Mood>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [jCardCassette, setJCardCassette] = useState<CassetteData | null>(null);
   const [isMixtapeModalOpen, setIsMixtapeModalOpen] = useState<boolean>(false);
   const [surpriseCassette, setSurpriseCassette] = useState<CassetteData | null>(null);
-
-  // 3. Audio & Vintage FX Settings
-  const [audioSettings, setAudioSettings] = useState<AudioSettings>({
-    sfxEnabled: true,
-    sfxVolume: 0.6,
-    tapeHissEnabled: false,
-    tapeHissVolume: 0.04,
-    tapeType: 'Type I (Normal)',
-    dolbyNR: 'B',
-    crtEffect: false,
-  });
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
 
   const ytPlayerRef = useRef<YouTubePlayerRef>(null);
-  const deckSectionRef = useRef<HTMLDivElement>(null);
   const shelfSectionRef = useRef<HTMLDivElement>(null);
 
-  // 4. Update track title if loadedCassette changes
+  // 4. Update track title when cassette changes
   useEffect(() => {
     if (loadedCassette) {
       setCurrentTrackName(loadedCassette.tracksDetailed?.[0]?.title || loadedCassette.title);
     }
   }, [loadedCassette]);
 
-  // 5. Keyboard Navigation & Shortcuts
+  // 5. Toggle Atmospheric Rain & Tape Hiss
+  const handleToggleRain = () => {
+    setIsRainActive((prev) => !prev);
+  };
+
+  const handleToggleTapeHiss = () => {
+    setIsTapeHissActive((prev) => {
+      const next = !prev;
+      if (next) soundSynth.startTapeHiss(0.04);
+      else soundSynth.stopTapeHiss();
+      return next;
+    });
+  };
+
+  // 6. Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't intercept when user is typing in an input/textarea
       if (
         document.activeElement?.tagName === 'INPUT' ||
         document.activeElement?.tagName === 'TEXTAREA'
@@ -112,11 +116,6 @@ export default function Home() {
           soundSynth.playButtonClick();
           ytPlayerRef.current?.previous();
           break;
-        case 'KeyE':
-          e.preventDefault();
-          soundSynth.playTapeEject();
-          handleEject();
-          break;
       }
     };
 
@@ -124,34 +123,28 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [playbackStatus]);
 
-  // 6. Filter Cassettes by Era, Mood, and Search Query
+  // 7. Filter Cassettes
   const filteredCassettes = useMemo(() => {
     return cassettes.filter((tape) => {
-      // Era filter
       if (selectedEra !== 'all' && tape.era !== selectedEra) {
         return false;
       }
 
-      // Mood filter
       if (selectedMood !== 'all' && !tape.moods.includes(selectedMood)) {
         return false;
       }
 
-      // Search Query filter
       if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
-        const matchesTitle = tape.title.toLowerCase().includes(query);
-        const matchesSubtitle = tape.subtitle.toLowerCase().includes(query);
-        const matchesHindi = tape.hindiTitle?.toLowerCase().includes(query) || false;
-        const matchesDescription = tape.description.toLowerCase().includes(query);
-        const matchesSource = tape.source.toLowerCase().includes(query);
-        const matchesEra = tape.era.toLowerCase().includes(query);
-        const matchesTracks =
-          tape.sideA.some((t) => t.toLowerCase().includes(query)) ||
-          tape.sideB.some((t) => t.toLowerCase().includes(query)) ||
-          tape.tracksDetailed?.some((t) => t.title.toLowerCase().includes(query) || t.artist?.toLowerCase().includes(query) || t.movie?.toLowerCase().includes(query));
+        const q = searchQuery.toLowerCase().trim();
+        const matchesTitle = tape.title.toLowerCase().includes(q);
+        const matchesSubtitle = tape.subtitle.toLowerCase().includes(q);
+        const matchesHindi = tape.hindiTitle?.toLowerCase().includes(q) || false;
+        const matchesDesc = tape.description.toLowerCase().includes(q);
+        const matchesSource = tape.source.toLowerCase().includes(q);
+        const matchesSideA = tape.sideA.some((s) => s.toLowerCase().includes(q));
+        const matchesSideB = tape.sideB.some((s) => s.toLowerCase().includes(q));
 
-        if (!matchesTitle && !matchesSubtitle && !matchesHindi && !matchesDescription && !matchesSource && !matchesEra && !matchesTracks) {
+        if (!matchesTitle && !matchesSubtitle && !matchesHindi && !matchesDesc && !matchesSource && !matchesSideA && !matchesSideB) {
           return false;
         }
       }
@@ -160,7 +153,7 @@ export default function Home() {
     });
   }, [cassettes, selectedEra, selectedMood, searchQuery]);
 
-  // 7. Player Control Handlers
+  // 8. Player Controls
   const handleSelectCassette = (tape: CassetteData) => {
     setLoadedCassette(tape);
     setPlaybackStatus('playing');
@@ -168,12 +161,12 @@ export default function Home() {
     setCurrentTrackName(tape.tracksDetailed?.[0]?.title || tape.title);
     soundSynth.playTapeInsert();
 
-    // Scroll to player deck smoothly
-    deckSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Scroll to top smoothly
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     setTimeout(() => {
       ytPlayerRef.current?.play();
-    }, 400);
+    }, 300);
   };
 
   const handlePlay = () => {
@@ -184,12 +177,6 @@ export default function Home() {
   const handlePause = () => {
     setPlaybackStatus('paused');
     ytPlayerRef.current?.pause();
-  };
-
-  const handleStop = () => {
-    setPlaybackStatus('paused');
-    ytPlayerRef.current?.stop();
-    setCurrentTime(0);
   };
 
   const handleNext = () => {
@@ -203,12 +190,6 @@ export default function Home() {
   const handleSeek = (seconds: number) => {
     setCurrentTime(seconds);
     ytPlayerRef.current?.seekTo(seconds);
-  };
-
-  const handleEject = () => {
-    soundSynth.playTapeEject();
-    handleStop();
-    setLoadedCassette(null);
   };
 
   const handleSurpriseMe = () => {
@@ -226,10 +207,6 @@ export default function Home() {
     shelfSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleScrollToDeck = () => {
-    deckSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
-
   const handleResetFilters = () => {
     setSelectedEra('all');
     setSelectedMood('all');
@@ -238,82 +215,68 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">
-      {/* Initial Loading Screen */}
+      {/* Intro Loading Screen */}
       {isLoading && (
         <LoadingScreen onComplete={() => setIsLoading(false)} />
       )}
 
-      {/* Atmospheric dust particles & film grain overlay */}
-      <ShopAtmosphere crtEnabled={audioSettings.crtEffect} />
+      {/* Atmospheric Rain & Lightning Engine */}
+      <ShopAtmosphere isRainActive={isRainActive} />
 
-      {/* Top Navbar */}
+      {/* Navbar (Delux Salon glass pill design) */}
       <Navbar
         onScrollToShelf={handleScrollToShelf}
-        onScrollToDeck={handleScrollToDeck}
         onSurpriseMe={handleSurpriseMe}
         onOpenMixtape={() => setIsMixtapeModalOpen(true)}
-        audioSettings={audioSettings}
-        onUpdateAudioSettings={(newSettings) =>
-          setAudioSettings((prev) => ({ ...prev, ...newSettings }))
-        }
+        onOpenSupport={() => setIsSupportModalOpen(true)}
+        isRainActive={isRainActive}
+        onToggleRain={handleToggleRain}
+        isTapeHissActive={isTapeHissActive}
+        onToggleTapeHiss={handleToggleTapeHiss}
         selectedEra={selectedEra}
         onSelectEra={setSelectedEra}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6">
-        {/* Hero Section */}
+        {/* Hero Section with Delux Music Player */}
         <HeroSection
-          onPlayCassetteClick={handleScrollToShelf}
-          onSurpriseMeClick={handleSurpriseMe}
-          onOpenMixtape={() => setIsMixtapeModalOpen(true)}
+          cassette={loadedCassette}
+          playbackStatus={playbackStatus}
+          currentTime={currentTime}
+          duration={duration}
+          currentTrackName={currentTrackName}
+          volume={volume}
+          isMuted={isMuted}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          onSeek={handleSeek}
+          onVolumeChange={setVolume}
+          onToggleMute={() => setIsMuted((prev) => !prev)}
+          onScrollToShelf={handleScrollToShelf}
+          onSurpriseMe={handleSurpriseMe}
+          onOpenJCard={() => {
+            if (loadedCassette) setJCardCassette(loadedCassette);
+          }}
         />
 
-        {/* Masterpiece Vintage Cassette Player Deck */}
-        <section ref={deckSectionRef} className="my-8 sm:my-12 scroll-mt-24">
-          <CassettePlayerDeck
-            cassette={loadedCassette}
-            playbackStatus={playbackStatus}
-            currentTime={currentTime}
-            duration={duration}
-            currentTrackName={currentTrackName}
-            volume={volume}
-            isMuted={isMuted}
-            audioSettings={audioSettings}
-            onPlay={handlePlay}
-            onPause={handlePause}
-            onStop={handleStop}
-            onNext={handleNext}
-            onPrevious={handlePrevious}
-            onSeek={handleSeek}
-            onVolumeChange={setVolume}
-            onToggleMute={() => setIsMuted((prev) => !prev)}
-            onEject={handleEject}
-            onToggleSettings={() => {}}
-            onToggleVideoPreview={() => setShowVideoPreview((prev) => !prev)}
-            showVideoPreview={showVideoPreview}
-            onOpenJCard={() => {
-              if (loadedCassette) setJCardCassette(loadedCassette);
-            }}
-          />
-
-          {/* Hidden / Toggleable YouTube IFrame Player */}
-          <YouTubePlayer
-            ref={ytPlayerRef}
-            cassette={loadedCassette}
-            isPlaying={playbackStatus === 'playing'}
-            volume={volume}
-            isMuted={isMuted}
-            showVideoDebug={showVideoPreview}
-            onStatusChange={setPlaybackStatus}
-            onTimeUpdate={(cur, dur) => {
-              setCurrentTime(cur);
-              setDuration(dur);
-            }}
-            onTrackChange={(trackTitle) => {
-              setCurrentTrackName(trackTitle);
-            }}
-          />
-        </section>
+        {/* Hidden Reliable YouTube IFrame Player */}
+        <YouTubePlayer
+          ref={ytPlayerRef}
+          cassette={loadedCassette}
+          isPlaying={playbackStatus === 'playing'}
+          volume={volume}
+          isMuted={isMuted}
+          onStatusChange={setPlaybackStatus}
+          onTimeUpdate={(cur, dur) => {
+            setCurrentTime(cur);
+            setDuration(dur);
+          }}
+          onTrackChange={(trackTitle) => {
+            setCurrentTrackName(trackTitle);
+          }}
+        />
 
         {/* Pick Your Era Section */}
         <EraSelector
@@ -340,7 +303,7 @@ export default function Home() {
           resultCount={filteredCassettes.length}
         />
 
-        {/* The Wooden Cassette Rack / Shelf */}
+        {/* The Cassette Rack / Shelf */}
         <div ref={shelfSectionRef}>
           <CassetteShelf
             cassettes={filteredCassettes}
@@ -353,29 +316,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Sticky Now Playing Bar (Desktop & Mobile) */}
-      <NowPlayingBar
-        cassette={loadedCassette}
-        playbackStatus={playbackStatus}
-        currentTime={currentTime}
-        duration={duration}
-        currentTrackName={currentTrackName}
-        volume={volume}
-        isMuted={isMuted}
-        onPlay={handlePlay}
-        onPause={handlePause}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        onSeek={handleSeek}
-        onVolumeChange={setVolume}
-        onToggleMute={() => setIsMuted((prev) => !prev)}
-        onEject={handleEject}
-        onFocusDeck={handleScrollToDeck}
-        onOpenJCard={() => {
-          if (loadedCassette) setJCardCassette(loadedCassette);
-        }}
-      />
-
       {/* J-Card Unfolding Booklet Modal */}
       <JCardModal
         cassette={jCardCassette}
@@ -384,19 +324,25 @@ export default function Home() {
         onPlay={handleSelectCassette}
       />
 
-      {/* Custom Mixtape Creator Modal ("Apna Mixtape Banao") */}
+      {/* Custom Mixtape Creator Modal */}
       <CustomMixtapeModal
         isOpen={isMixtapeModalOpen}
         onClose={() => setIsMixtapeModalOpen(false)}
         onMixtapeCreated={handleCustomMixtapeCreated}
       />
 
-      {/* Surprise Me Postcard Modal */}
+      {/* Surprise Me Modal */}
       <SurpriseMeModal
         cassette={surpriseCassette}
         isOpen={!!surpriseCassette}
         onClose={() => setSurpriseCassette(null)}
         onConfirmPlay={handleSelectCassette}
+      />
+
+      {/* Support Us Modal */}
+      <SupportModal
+        isOpen={isSupportModalOpen}
+        onClose={() => setIsSupportModalOpen(false)}
       />
 
       {/* Footer */}

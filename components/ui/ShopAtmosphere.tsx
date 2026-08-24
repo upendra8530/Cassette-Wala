@@ -3,17 +3,18 @@
 import React, { useEffect, useRef } from 'react';
 
 interface ShopAtmosphereProps {
-  crtEnabled?: boolean;
+  isRainActive?: boolean;
 }
 
 export const ShopAtmosphere: React.FC<ShopAtmosphereProps> = ({
-  crtEnabled = false,
+  isRainActive = false,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const rainCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const flashOverlayRef = useRef<HTMLDivElement | null>(null);
 
-  // Subtle floating dust motes in warm cassette shop lighting
+  // Atmospheric Rain & Lightning Engine
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = rainCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -30,50 +31,73 @@ export const ShopAtmosphere: React.FC<ShopAtmosphereProps> = ({
 
     window.addEventListener('resize', handleResize);
 
-    // Dust particles
-    const particleCount = 28;
-    const particles: Array<{
+    const dropCount = 120;
+    const drops: Array<{
       x: number;
       y: number;
-      radius: number;
-      speedX: number;
-      speedY: number;
+      length: number;
+      speed: number;
       opacity: number;
-      pulseSpeed: number;
     }> = [];
 
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
+    for (let i = 0; i < dropCount; i++) {
+      drops.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        radius: Math.random() * 1.5 + 0.5,
-        speedX: (Math.random() - 0.5) * 0.25,
-        speedY: -Math.random() * 0.3 - 0.05,
-        opacity: Math.random() * 0.4 + 0.1,
-        pulseSpeed: Math.random() * 0.02 + 0.005,
+        length: Math.random() * 18 + 10,
+        speed: Math.random() * 10 + 12,
+        opacity: Math.random() * 0.4 + 0.15,
       });
+    }
+
+    // Occasional lightning flash
+    let lightningTimer: NodeJS.Timeout | null = null;
+    const triggerLightning = () => {
+      if (!isRainActive || !flashOverlayRef.current) return;
+      flashOverlayRef.current.style.opacity = '0.35';
+      setTimeout(() => {
+        if (flashOverlayRef.current) flashOverlayRef.current.style.opacity = '0';
+        setTimeout(() => {
+          if (flashOverlayRef.current && Math.random() > 0.4) {
+            flashOverlayRef.current.style.opacity = '0.2';
+            setTimeout(() => {
+              if (flashOverlayRef.current) flashOverlayRef.current.style.opacity = '0';
+            }, 60);
+          }
+        }, 80);
+      }, 70);
+
+      const nextDelay = Math.random() * 14000 + 8000;
+      lightningTimer = setTimeout(triggerLightning, nextDelay);
+    };
+
+    if (isRainActive) {
+      lightningTimer = setTimeout(triggerLightning, 4000);
     }
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      particles.forEach((p) => {
-        p.x += p.speedX;
-        p.y += p.speedY;
-        p.opacity += Math.sin(Date.now() * p.pulseSpeed) * 0.005;
+      if (isRainActive) {
+        ctx.strokeStyle = 'rgba(186, 230, 253, 0.45)';
+        ctx.lineWidth = 1.2;
+        ctx.lineCap = 'round';
 
-        // Wrap around screen
-        if (p.y < 0) p.y = height;
-        if (p.x < 0) p.x = width;
-        if (p.x > width) p.x = 0;
+        drops.forEach((d) => {
+          ctx.beginPath();
+          ctx.moveTo(d.x, d.y);
+          ctx.lineTo(d.x - 2, d.y + d.length);
+          ctx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(243, 179, 58, ${Math.max(0.05, Math.min(0.5, p.opacity))})`;
-        ctx.shadowBlur = 4;
-        ctx.shadowColor = 'rgba(243, 179, 58, 0.4)';
-        ctx.fill();
-      });
+          d.y += d.speed;
+          d.x -= 1.5;
+
+          if (d.y > height) {
+            d.y = -20;
+            d.x = Math.random() * (width + 100);
+          }
+        });
+      }
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -83,24 +107,24 @@ export const ShopAtmosphere: React.FC<ShopAtmosphereProps> = ({
     return () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
+      if (lightningTimer) clearTimeout(lightningTimer);
     };
-  }, []);
+  }, [isRainActive]);
 
   return (
     <>
-      {/* Floating dust canvas */}
+      {/* Rain canvas */}
       <canvas
-        ref={canvasRef}
-        className="pointer-events-none fixed inset-0 z-10 opacity-70"
+        ref={rainCanvasRef}
+        id="rainCanvas"
+        className={isRainActive ? 'active' : ''}
       />
 
-      {/* Film Grain & Paper Texture Overlay */}
-      <div className="pointer-events-none fixed inset-0 z-20 opacity-20 mix-blend-overlay bg-[radial-gradient(#d99b26_1px,transparent_1px)] [background-size:16px_16px]" />
+      {/* Lightning screen flash */}
+      <div ref={flashOverlayRef} id="lightningFlashOverlay" />
 
-      {/* CRT Scanline & Curved Glass Texture if enabled */}
-      {crtEnabled && (
-        <div className="pointer-events-none fixed inset-0 z-30 opacity-40 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] animate-flicker" />
-      )}
+      {/* Subtle warm paper texture */}
+      <div className="pointer-events-none fixed inset-0 z-10 opacity-15 mix-blend-overlay bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:24px_24px]" />
     </>
   );
 };

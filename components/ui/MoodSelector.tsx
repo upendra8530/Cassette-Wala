@@ -16,40 +16,36 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({
   onSelectMood,
 }) => {
   return (
-    <section className="my-8 sm:my-12">
-      {/* Header */}
-      <div className="text-center mb-5 sm:mb-6">
-        <h3 className="font-serif text-xl sm:text-2xl font-black text-stone-100 uppercase tracking-wide">
-          WHAT&apos;S YOUR MOOD?
+    <section className="my-8 sm:my-10">
+      <div className="text-center mb-4">
+        <h3 className="font-display text-xl sm:text-2xl text-white">
+          What&apos;s Your Mood?
         </h3>
-        <p className="text-xs sm:text-sm font-hindi text-amber-200/80 mt-0.5">
+        <p className="text-xs sm:text-sm font-hindi text-amber-300/80">
           जैसा मिज़ाज, वैसा तराना
         </p>
       </div>
 
-      {/* Mood Badges Carousel / Grid */}
-      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 max-w-5xl mx-auto px-4">
+      <div className="flex flex-wrap items-center justify-center gap-2 max-w-4xl mx-auto px-4">
         {MOOD_FILTERS.map((m) => {
           const isSelected = selectedMood === m.id;
 
           return (
-            <motion.button
+            <button
               key={m.id}
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
               onClick={() => {
                 soundSynth.playSwitchClick();
                 onSelectMood(m.id as Mood);
               }}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-2 border shadow-sm ${
+              className={`tweak-pill ${
                 isSelected
-                  ? 'bg-gradient-to-r from-retro-red via-retro-rust to-retro-red text-white border-red-400 font-bold shadow-amber-glow'
-                  : 'bg-wood-900/80 hover:bg-wood-800 text-stone-300 hover:text-amber-200 border-wood-700 hover:border-wood-600'
+                  ? 'bg-amber-500/25 border-amber-400 text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
+                  : ''
               }`}
             >
-              <span className="text-base sm:text-lg">{m.emoji}</span>
-              <span className="font-sans">{m.label}</span>
-            </motion.button>
+              <span>{m.emoji}</span>
+              <span>{m.label}</span>
+            </button>
           );
         })}
       </div>

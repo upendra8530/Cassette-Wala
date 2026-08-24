@@ -17,20 +17,15 @@ export const EraSelector: React.FC<EraSelectorProps> = ({
 }) => {
   return (
     <section className="my-10 sm:my-14">
-      {/* Section Header */}
-      <div className="text-center mb-6 sm:mb-8">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-wood-900 border border-wood-700 text-[11px] font-mono font-bold uppercase tracking-widest text-retro-gold mb-2">
-          <span>TIME TRAVEL DIAL</span>
-        </div>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-black text-stone-100 tracking-tight">
-          PICK YOUR ERA
+      <div className="text-center mb-6">
+        <h2 className="text-2xl sm:text-3xl font-display text-white tracking-tight">
+          Pick Your Era
         </h2>
-        <p className="text-xs sm:text-sm font-hindi text-amber-200/80 mt-1">
-          अपना पसंदीदा दौर चुनें — हर दशक का अपना जादू
+        <p className="text-xs sm:text-sm font-hindi text-amber-300/80 mt-0.5">
+          अपना पसंदीदा दौर चुनें — हर दशक की अपनी कहानी
         </p>
       </div>
 
-      {/* 3 Era Cards Grid (+ All option) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto px-4">
         {ERA_FILTERS.map((era) => {
           const isSelected = selectedEra === era.id;
@@ -38,61 +33,48 @@ export const EraSelector: React.FC<EraSelectorProps> = ({
           return (
             <motion.button
               key={era.id}
-              whileHover={{ y: -4, scale: 1.02 }}
+              whileHover={{ y: -3 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
                 soundSynth.playSwitchClick();
                 onSelectEra(era.id as Era);
               }}
-              className={`relative text-left p-5 rounded-2xl border-2 transition-all duration-300 overflow-hidden flex flex-col justify-between select-none ${
+              className={`relative text-left p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between select-none ${
                 isSelected
-                  ? 'bg-gradient-to-b from-[#3d2719] via-[#2a1a11] to-[#1a100a] border-retro-gold shadow-cassette-hover'
-                  : 'bg-wood-950/80 hover:bg-wood-900 border-wood-800 hover:border-wood-600 shadow-md'
+                  ? 'bg-gradient-to-b from-[#2b0b06] to-[#150503] border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.3)]'
+                  : 'bg-black/40 hover:bg-black/60 border-white/10 hover:border-white/20'
               }`}
             >
-              {/* Background Glow for selected card */}
-              {isSelected && (
-                <div
-                  className="pointer-events-none absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl opacity-30"
-                  style={{ backgroundColor: era.color }}
-                />
-              )}
-
               <div>
-                {/* Era Header */}
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-3xl">{era.icon}</span>
+                  <span className="text-2xl">{era.icon}</span>
                   <span
-                    className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${
+                    className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase ${
                       isSelected
-                        ? 'bg-retro-gold text-wood-950 border-amber-300'
-                        : 'bg-wood-900 text-stone-400 border-wood-700'
+                        ? 'bg-amber-400 text-black border-amber-300'
+                        : 'bg-white/10 text-white/60 border-white/15'
                     }`}
                   >
                     {era.years}
                   </span>
                 </div>
 
-                {/* Title */}
-                <h3 className="font-serif text-lg sm:text-xl font-black text-stone-100">
+                <h3 className="font-display text-lg text-white">
                   {era.label}
                 </h3>
-                <p className="text-xs font-mono text-retro-gold font-bold mt-0.5">
+                <p className="text-xs font-hindi text-amber-300 font-bold mt-0.5">
                   {era.tagline}
                 </p>
-
-                {/* Description */}
-                <p className="text-xs text-stone-400 font-sans mt-2.5 leading-relaxed">
+                <p className="text-xs text-white/60 font-sans mt-2 leading-relaxed">
                   {era.description}
                 </p>
               </div>
 
-              {/* Bottom selection indicator */}
-              <div className="mt-4 pt-3 border-t border-wood-800/80 flex items-center justify-between text-xs font-mono">
-                <span className={isSelected ? 'text-amber-300 font-bold' : 'text-stone-500'}>
-                  {isSelected ? '● ACTIVE ERA' : 'SELECT ERA'}
+              <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
+                <span className={isSelected ? 'text-amber-400 font-bold' : 'text-white/40'}>
+                  {isSelected ? '● ACTIVE' : 'SELECT'}
                 </span>
-                <span className="text-sm">{isSelected ? '✓' : '→'}</span>
+                <span>{isSelected ? '✓' : '→'}</span>
               </div>
             </motion.button>
           );

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { Search, X, Sparkles } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { soundSynth } from '@/lib/soundSynth';
 
 interface SearchBarProps {
@@ -21,11 +21,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     'Kumar Sanu',
     'Alka Yagnik',
     '80s Golden',
-    'Rain',
-    'Road Trip',
+    'Baarish',
     'Jagjit Singh',
     'Lucky Ali',
-    'Sad',
+    'Safar',
   ];
 
   const handleTagClick = (tag: string) => {
@@ -41,9 +40,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <div className="w-full max-w-2xl mx-auto px-4 my-6">
-      {/* Search Input Box */}
       <div className="relative flex items-center">
-        <div className="absolute left-3.5 text-retro-gold pointer-events-none">
+        <div className="absolute left-4 text-amber-400 pointer-events-none">
           <Search className="w-4 h-4" />
         </div>
 
@@ -52,41 +50,38 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Cassette, Singer, Movie ya Mood khojein (e.g. Kumar Sanu, Rain, 90s)..."
-          className="w-full bg-wood-950/90 border-2 border-wood-700 focus:border-retro-gold rounded-xl pl-10 pr-24 py-3 text-sm text-stone-100 placeholder-stone-400 focus:outline-none shadow-inner transition-colors font-sans"
+          placeholder="Cassette, Singer ya Mood khojein (e.g. Kumar Sanu, Baarish, 90s)..."
+          className="w-full bg-black/50 border border-white/20 focus:border-amber-400 rounded-full pl-11 pr-24 py-3 text-sm text-white placeholder-white/40 focus:outline-none shadow-inner transition-colors font-sans"
         />
 
-        {/* Right Action: Result count & Clear button */}
         <div className="absolute right-3 flex items-center gap-2">
-          {searchQuery ? (
+          {searchQuery && (
             <button
               onClick={handleClear}
-              className="p-1 rounded-full bg-wood-800 hover:bg-wood-700 text-stone-400 hover:text-stone-200 transition-colors"
-              aria-label="Clear search"
+              className="p-1 rounded-full bg-white/10 hover:bg-white/20 text-white/60 transition-colors"
             >
               <X className="w-3.5 h-3.5" />
             </button>
-          ) : null}
+          )}
 
-          <span className="font-mono text-[10px] text-retro-gold bg-wood-900 border border-wood-700 px-2 py-0.5 rounded">
+          <span className="font-mono text-[10px] text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full">
             {resultCount} CASSETTES
           </span>
         </div>
       </div>
 
-      {/* Quick Search Chips */}
-      <div className="flex flex-wrap items-center gap-1.5 mt-2.5 px-1">
-        <span className="text-[11px] font-mono text-stone-400 font-bold uppercase mr-1">
+      <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3">
+        <span className="text-[11px] font-mono text-white/40 font-bold uppercase mr-1">
           POPULAR:
         </span>
         {quickSearchTags.map((tag) => (
           <button
             key={tag}
             onClick={() => handleTagClick(tag)}
-            className={`text-[11px] font-sans px-2.5 py-0.5 rounded-full border transition-colors ${
+            className={`text-[11px] px-3 py-0.5 rounded-full border transition-colors ${
               searchQuery.toLowerCase() === tag.toLowerCase()
-                ? 'bg-retro-gold text-wood-950 border-amber-300 font-bold'
-                : 'bg-wood-900/60 hover:bg-wood-800 text-stone-300 border-wood-800 hover:border-wood-700'
+                ? 'bg-amber-500 text-black border-amber-400 font-bold'
+                : 'bg-white/5 hover:bg-white/10 text-white/70 border-white/10'
             }`}
           >
             {tag}

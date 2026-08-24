@@ -18,7 +18,6 @@ interface YouTubePlayerProps {
   onStatusChange: (status: PlaybackStatus) => void;
   onTimeUpdate: (currentTime: number, duration: number) => void;
   onTrackChange?: (trackTitle: string, trackIndex: number) => void;
-  showVideoDebug?: boolean;
 }
 
 export interface YouTubePlayerRef {
@@ -41,18 +40,17 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
       onStatusChange,
       onTimeUpdate,
       onTrackChange,
-      showVideoDebug = false,
     },
     ref
   ) => {
-    const playerContainerRef = useRef<HTMLDivElement>(null);
-    const playerInstanceRef = useRef<any>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const playerRef = useRef<any>(null);
     const timeIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const [isApiReady, setIsApiReady] = useState(false);
-    const [isPlayerInitialized, setIsPlayerInitialized] = useState(false);
-    const currentCassetteIdRef = useRef<string | null>(null);
+    const [isReady, setIsReady] = useState(false);
+    const activeCassetteIdRef = useRef<string | null>(null);
 
-    // 1. Load YouTube IFrame API script
+    // 1. Load YouTube IFrame API
     useEffect(() => {
       if (typeof window === 'undefined') return;
 
@@ -73,17 +71,17 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
           setIsApiReady(true);
         };
       } else {
-        const checkReady = setInterval(() => {
+        const timer = setInterval(() => {
           if (window.YT && window.YT.Player) {
             setIsApiReady(true);
-            clearInterval(checkReady);
+            clearInterval(timer);
           }
         }, 100);
-        return () => clearInterval(checkReady);
+        return () => clearInterval(timer);
       }
     }, []);
 
-    // 2. Clear timer on unmount
+    // 2. Start / Stop Progress Tracking
     const stopTimeTracking = useCallback(() => {
       if (timeIntervalRef.current) {
         clearInterval(timeIntervalRef.current);
@@ -91,18 +89,16 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
       }
     }, []);
 
-    // 3. Start timer for progress updates
     const startTimeTracking = useCallback(() => {
       stopTimeTracking();
       timeIntervalRef.current = setInterval(() => {
-        const player = playerInstanceRef.current;
+        const player = playerRef.current;
         if (player && typeof player.getCurrentTime === 'function' && typeof player.getDuration === 'function') {
           try {
-            const curTime = player.getCurrentTime() || 0;
+            const cur = player.getCurrentTime() || 0;
             const dur = player.getDuration() || 0;
-            onTimeUpdate(curTime, dur);
+            onTimeUpdate(cur, dur);
 
-            // Check if title changed
             if (typeof player.getVideoData === 'function') {
               const data = player.getVideoData();
               if (data && data.title && onTrackChange) {
@@ -114,21 +110,24 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
             // Ignore cross-origin tick glitches
           }
         }
-      }, 500);
+      }, 400);
     }, [onTimeUpdate, onTrackChange, stopTimeTracking]);
 
-    // 4. Initialize Player Instance once API is ready
+    // 3. Initialize Player
     useEffect(() => {
-      if (!isApiReady || !playerContainerRef.current || isPlayerInitialized) return;
+      if (!isApiReady || !containerRef.current || isReady) return;
+
+      const initialVideoId = cassette?.youtubeId || 'ePSzjF0WzSg';
 
       try {
-        playerInstanceRef.current = new window.YT.Player(playerContainerRef.current, {
-          height: '100%',
-          width: '100%',
+        playerRef.current = new window.YT.Player(containerRef.current, {
+          height: '200',
+          width: '200',
+          videoId: initialVideoId,
           playerVars: {
             autoplay: 0,
-            controls: 1,
-            disablekb: 0,
+            controls: 0,
+            disablekb: 1,
             enablejsapi: 1,
             fs: 0,
             iv_load_policy: 3,
@@ -138,14 +137,15 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
             origin: typeof window !== 'undefined' ? window.location.origin : '',
           },
           events: {
-            onReady: (event: any) => {
-              setIsPlayerInitialized(true);
-              event.target.setVolume(volume);
-              if (isMuted) event.target.mute();
+            onReady: (e: any) => {
+              setIsReady(true);
+              try {
+                e.target.setVolume(volume);
+                if (isMuted) e.target.mute();
+              } catch {}
             },
-            onStateChange: (event: any) => {
-              const state = event.data;
-              // YT.PlayerState: UNSTARTED (-1), ENDED (0), PLAYING (1), PAUSED (2), BUFFERING (3), CUED (5)
+            onStateChange: (e: any) => {
+              const state = e.data;
               let status: PlaybackStatus = 'unstarted';
               if (state === 1) {
                 status = 'playing';
@@ -164,26 +164,32 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
               onStatusChange(status);
             },
             onError: (err: any) => {
-              console.warn('YouTube Player Event Error:', err);
+              console.warn('YouTube Player Error code:', err?.data);
+              // Fallback to verified superhit video if specific video fails
+              try {
+                if (playerRef.current) {
+                  playerRef.current.loadVideoById('ePSzjF0WzSg');
+                }
+              } catch {}
             },
           },
         });
       } catch (err) {
-        console.error('Error creating YouTube player instance:', err);
+        console.error('Failed to instantiate YouTube player:', err);
       }
 
       return () => {
         stopTimeTracking();
       };
-    }, [isApiReady, isPlayerInitialized, isMuted, volume, onStatusChange, startTimeTracking, stopTimeTracking]);
+    }, [isApiReady, isReady, volume, isMuted, onStatusChange, startTimeTracking, stopTimeTracking]);
 
-    // 5. Load or update media when cassette changes
+    // 4. Load New Cassette Video / Playlist
     useEffect(() => {
-      const player = playerInstanceRef.current;
-      if (!player || !isPlayerInitialized || !cassette) return;
+      const player = playerRef.current;
+      if (!player || !isReady || !cassette) return;
 
-      if (currentCassetteIdRef.current === cassette.id) return;
-      currentCassetteIdRef.current = cassette.id;
+      if (activeCassetteIdRef.current === cassette.id) return;
+      activeCassetteIdRef.current = cassette.id;
 
       try {
         if (cassette.type === 'playlist' && cassette.youtubePlaylistId) {
@@ -191,23 +197,24 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
             list: cassette.youtubePlaylistId,
             listType: 'playlist',
             index: 0,
-            suggestedQuality: 'hd720',
           });
-        } else if (cassette.youtubeId) {
-          player.loadVideoById({
-            videoId: cassette.youtubeId,
-            suggestedQuality: 'hd720',
-          });
+        } else {
+          const videoIdToLoad = cassette.youtubeId || 'ePSzjF0WzSg';
+          if (isPlaying) {
+            player.loadVideoById({ videoId: videoIdToLoad });
+          } else {
+            player.cueVideoById({ videoId: videoIdToLoad });
+          }
         }
       } catch (e) {
-        console.warn('Error loading video/playlist on player:', e);
+        console.warn('Error loading cassette media:', e);
       }
-    }, [cassette, isPlayerInitialized]);
+    }, [cassette, isReady, isPlaying]);
 
-    // 6. Handle play/pause commands from parent
+    // 5. Play / Pause Control
     useEffect(() => {
-      const player = playerInstanceRef.current;
-      if (!player || !isPlayerInitialized) return;
+      const player = playerRef.current;
+      if (!player || !isReady) return;
 
       try {
         const state = typeof player.getPlayerState === 'function' ? player.getPlayerState() : -1;
@@ -219,86 +226,78 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
       } catch (e) {
         console.warn('Playback toggle error:', e);
       }
-    }, [isPlaying, isPlayerInitialized]);
+    }, [isPlaying, isReady]);
 
-    // 7. Volume and mute updates
+    // 6. Volume & Mute Updates
     useEffect(() => {
-      const player = playerInstanceRef.current;
-      if (!player || !isPlayerInitialized) return;
+      const player = playerRef.current;
+      if (!player || !isReady) return;
       try {
         if (typeof player.setVolume === 'function') {
           player.setVolume(volume);
         }
         if (typeof player.mute === 'function' && typeof player.unMute === 'function') {
-          if (isMuted) {
-            player.mute();
-          } else {
-            player.unMute();
-          }
+          if (isMuted) player.mute();
+          else player.unMute();
         }
-      } catch (e) {
-        console.warn('Volume update error:', e);
-      }
-    }, [volume, isMuted, isPlayerInitialized]);
+      } catch {}
+    }, [volume, isMuted, isReady]);
 
-    // 8. Expose imperative commands via React ref
+    // 7. Imperative Ref Methods
     React.useImperativeHandle(ref, () => ({
       play: () => {
         try {
-          playerInstanceRef.current?.playVideo();
+          if (playerRef.current) {
+            playerRef.current.unMute();
+            playerRef.current.playVideo();
+          }
         } catch {}
       },
       pause: () => {
         try {
-          playerInstanceRef.current?.pauseVideo();
+          playerRef.current?.pauseVideo();
         } catch {}
       },
       stop: () => {
         try {
-          playerInstanceRef.current?.stopVideo();
+          playerRef.current?.stopVideo();
           stopTimeTracking();
           onTimeUpdate(0, 0);
         } catch {}
       },
       next: () => {
         try {
-          if (typeof playerInstanceRef.current?.nextVideo === 'function') {
-            playerInstanceRef.current.nextVideo();
+          if (typeof playerRef.current?.nextVideo === 'function') {
+            playerRef.current.nextVideo();
           }
         } catch {}
       },
       previous: () => {
         try {
-          if (typeof playerInstanceRef.current?.previousVideo === 'function') {
-            playerInstanceRef.current.previousVideo();
+          if (typeof playerRef.current?.previousVideo === 'function') {
+            playerRef.current.previousVideo();
           }
         } catch {}
       },
       seekTo: (seconds: number) => {
         try {
-          if (typeof playerInstanceRef.current?.seekTo === 'function') {
-            playerInstanceRef.current.seekTo(seconds, true);
+          if (typeof playerRef.current?.seekTo === 'function') {
+            playerRef.current.seekTo(seconds, true);
           }
         } catch {}
       },
       seekRelative: (offsetSeconds: number) => {
         try {
-          const cur = playerInstanceRef.current?.getCurrentTime() || 0;
-          const nextTime = Math.max(0, cur + offsetSeconds);
-          playerInstanceRef.current?.seekTo(nextTime, true);
+          const cur = playerRef.current?.getCurrentTime() || 0;
+          const next = Math.max(0, cur + offsetSeconds);
+          playerRef.current?.seekTo(next, true);
         } catch {}
       },
     }));
 
     return (
-      <div
-        className={`transition-all duration-300 ${
-          showVideoDebug
-            ? 'relative w-full aspect-video rounded-lg overflow-hidden border-2 border-retro-gold shadow-2xl bg-black my-4'
-            : 'absolute -top-[9999px] -left-[9999px] w-1 h-1 opacity-0 pointer-events-none'
-        }`}
-      >
-        <div ref={playerContainerRef} className="w-full h-full" />
+      <div className="fixed -bottom-96 -right-96 w-48 h-48 opacity-[0.001] pointer-events-none z-[-10] overflow-hidden">
+        <div ref={containerRef} id="youtubeBridge" />
       </div>
     );
   }

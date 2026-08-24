@@ -1,10 +1,31 @@
 import type { Metadata, Viewport } from 'next';
-import { Playfair_Display, Kalam, Caveat, Share_Tech_Mono, Outfit } from 'next/font/google';
+import { Rozha_One, Yatra_One, Space_Grotesk, Share_Tech_Mono, Kalam } from 'next/font/google';
 import './globals.css';
 
-const playfair = Playfair_Display({
+const rozhaOne = Rozha_One({
+  weight: '400',
+  subsets: ['latin', 'devanagari'],
+  variable: '--font-rozha',
+  display: 'swap',
+});
+
+const yatraOne = Yatra_One({
+  weight: '400',
+  subsets: ['latin', 'devanagari'],
+  variable: '--font-yatra',
+  display: 'swap',
+});
+
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-playfair',
+  variable: '--font-space',
+  display: 'swap',
+});
+
+const shareTechMono = Share_Tech_Mono({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-mono-tech',
   display: 'swap',
 });
 
@@ -15,63 +36,36 @@ const kalam = Kalam({
   display: 'swap',
 });
 
-const caveat = Caveat({
-  subsets: ['latin'],
-  variable: '--font-caveat',
-  display: 'swap',
-});
-
-const shareTechMono = Share_Tech_Mono({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-share-tech-mono',
-  display: 'swap',
-});
-
-const outfit = Outfit({
-  subsets: ['latin'],
-  variable: '--font-outfit',
-  display: 'swap',
-});
-
 export const viewport: Viewport = {
-  themeColor: '#18100b',
+  themeColor: '#120806',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
 };
 
 export const metadata: Metadata = {
-  title: 'Cassette Wala | Rewind. Play. Relive.',
+  title: 'Cassette Wala | Delux 80s, 90s & 2000s Indian Retro Cassette Shop',
   description:
-    'Relive the golden era of 80s, 90s and 2000s Bollywood music. Explore nostalgic playlists through an authentic interactive cassette player experience.',
+    'Cassette Wala (कैसेट वाला) is a nostalgic Indian retro cassette player and ambient music shop. Explore physical cassette tapes from 80s, 90s & 2000s Bollywood, Kumar Sanu, Udit Narayan, Alka Yagnik, and indie classics.',
   keywords: [
     'Cassette Wala',
-    '80s Bollywood songs',
-    '90s Bollywood evergreen',
-    '2000s Indian pop',
+    'Cassette Wala music',
+    '90s Bollywood songs',
+    '80s Hindi songs',
+    '2000s Hindi nostalgia',
     'Kumar Sanu romantic songs',
     'Alka Yagnik hits',
-    'Udit Narayan duets',
-    'Retro Indian music player',
-    'Nostalgic Hindi songs',
-    'Vintage cassette player',
+    'Indian retro ambient radio',
+    'cassettewala.in',
   ],
   authors: [{ name: 'Cassette Wala' }],
-  creator: 'Cassette Wala',
   openGraph: {
     title: 'Cassette Wala | Rewind. Play. Relive.',
     description:
-      'Your favourite 80s, 90s and 2000s memories — one physical cassette at a time. Step into an old Indian cassette shop.',
+      'Step into an old Indian cassette shop. Physical cassettes, rotating spools, and nostalgic Bollywood music.',
     type: 'website',
     locale: 'en_IN',
     siteName: 'Cassette Wala',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Cassette Wala | Rewind. Play. Relive.',
-    description:
-      'Relive the golden era of 80s, 90s and 2000s Bollywood music through an authentic interactive cassette player experience.',
   },
 };
 
@@ -83,9 +77,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${kalam.variable} ${caveat.variable} ${shareTechMono.variable} ${outfit.variable}`}
+      className={`${rozhaOne.variable} ${yatraOne.variable} ${spaceGrotesk.variable} ${shareTechMono.variable} ${kalam.variable} scroll-smooth`}
     >
-      <body className="bg-[#120d09] text-stone-200 antialiased font-sans min-h-screen selection:bg-retro-gold selection:text-wood-950">
+      <body className="bg-[#120806] text-white selection:bg-amber-500/40 font-sans antialiased overflow-x-hidden">
         {children}
       </body>
     </html>
