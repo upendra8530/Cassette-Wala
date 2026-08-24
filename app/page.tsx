@@ -27,6 +27,7 @@ export default function Home() {
   const [playbackStatus, setPlaybackStatus] = useState<PlaybackStatus>('unstarted');
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(0);
   const [currentTrackName, setCurrentTrackName] = useState<string>('');
   const [volume, setVolume] = useState<number>(100);
   const [isMuted, setIsMuted] = useState<boolean>(false);
@@ -50,6 +51,7 @@ export default function Home() {
   // 4. Update track title when cassette changes
   useEffect(() => {
     if (loadedCassette) {
+      setCurrentTrackIndex(0);
       setCurrentTrackName(loadedCassette.tracksDetailed?.[0]?.title || loadedCassette.title);
     }
   }, [loadedCassette]);
@@ -68,7 +70,29 @@ export default function Home() {
     });
   };
 
-  // 6. Keyboard Shortcuts
+  // 6. Synchronize current track name with elapsed time
+  const handleTimeUpdate = (cur: number, dur: number) => {
+    setCurrentTime(cur);
+    setDuration(dur);
+
+    if (loadedCassette?.tracksDetailed && loadedCassette.tracksDetailed.length > 0) {
+      const tracks = loadedCassette.tracksDetailed;
+      let activeIdx = 0;
+      for (let i = 0; i < tracks.length; i++) {
+        if (cur >= (tracks[i].timestampSeconds || 0)) {
+          activeIdx = i;
+        } else {
+          break;
+        }
+      }
+      if (activeIdx !== currentTrackIndex) {
+        setCurrentTrackIndex(activeIdx);
+        setCurrentTrackName(tracks[activeIdx].title);
+      }
+    }
+  };
+
+  // 7. Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -109,21 +133,21 @@ export default function Home() {
         case 'KeyN':
           e.preventDefault();
           soundSynth.playButtonClick();
-          ytPlayerRef.current?.next();
+          handleNext();
           break;
         case 'KeyP':
           e.preventDefault();
           soundSynth.playButtonClick();
-          ytPlayerRef.current?.previous();
+          handlePrevious();
           break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [playbackStatus]);
+  }, [playbackStatus, currentTrackIndex, loadedCassette, currentTime, duration, cassettes]);
 
-  // 7. Filter Cassettes
+  // 8. Filter Cassettes
   const filteredCassettes = useMemo(() => {
     return cassettes.filter((tape) => {
       if (selectedEra !== 'all' && tape.era !== selectedEra) {
@@ -153,11 +177,12 @@ export default function Home() {
     });
   }, [cassettes, selectedEra, selectedMood, searchQuery]);
 
-  // 8. Player Controls
+  // 9. Player Controls & Track Navigation
   const handleSelectCassette = (tape: CassetteData) => {
     setLoadedCassette(tape);
     setPlaybackStatus('playing');
     setCurrentTime(0);
+    setCurrentTrackIndex(0);
     setCurrentTrackName(tape.tracksDetailed?.[0]?.title || tape.title);
     soundSynth.playTapeInsert();
 
@@ -179,12 +204,63 @@ export default function Home() {
     ytPlayerRef.current?.pause();
   };
 
+  // Next Track / Next Cassette
   const handleNext = () => {
-    ytPlayerRef.current?.next();
+    soundSynth.playRewindWhoosh();
+
+    // 1. If current cassette has chapter tracks and next track exists within this tape
+    if (loadedCassette?.tracksDetailed && currentTrackIndex + 1 < loadedCassette.tracksDetailed.length) {
+      const nextIdx = currentTrackIndex + 1;
+      const nextTrack = loadedCassette.tracksDetailed[nextIdx];
+      setCurrentTrackIndex(nextIdx);
+      setCurrentTrackName(nextTrack.title);
+      ytPlayerRef.current?.seekTo(nextTrack.timestampSeconds || 0);
+      return;
+    }
+
+    // 2. If it's a YouTube playlist, call next
+    if (loadedCassette?.type === 'youtube-playlist') {
+      ytPlayerRef.current?.next();
+      return;
+    }
+
+    // 3. Otherwise, move to the next cassette in the rack
+    const curIdx = cassettes.findIndex((c) => c.id === loadedCassette?.id);
+    const nextTape = cassettes[(curIdx + 1) % cassettes.length];
+    handleSelectCassette(nextTape);
   };
 
+  // Previous Track / Previous Cassette
   const handlePrevious = () => {
-    ytPlayerRef.current?.previous();
+    soundSynth.playRewindWhoosh();
+
+    // 1. If more than 5s played into current track, restart current track
+    const currentTrackStart = loadedCassette?.tracksDetailed?.[currentTrackIndex]?.timestampSeconds || 0;
+    if (currentTime > currentTrackStart + 5) {
+      ytPlayerRef.current?.seekTo(currentTrackStart);
+      return;
+    }
+
+    // 2. If previous track exists in this cassette, jump back to it
+    if (loadedCassette?.tracksDetailed && currentTrackIndex > 0) {
+      const prevIdx = currentTrackIndex - 1;
+      const prevTrack = loadedCassette.tracksDetailed[prevIdx];
+      setCurrentTrackIndex(prevIdx);
+      setCurrentTrackName(prevTrack.title);
+      ytPlayerRef.current?.seekTo(prevTrack.timestampSeconds || 0);
+      return;
+    }
+
+    // 3. If it's a YouTube playlist, call prev
+    if (loadedCassette?.type === 'youtube-playlist') {
+      ytPlayerRef.current?.previous();
+      return;
+    }
+
+    // 4. Otherwise, jump to the previous cassette in the shelf
+    const curIdx = cassettes.findIndex((c) => c.id === loadedCassette?.id);
+    const prevTape = cassettes[(curIdx - 1 + cassettes.length) % cassettes.length];
+    handleSelectCassette(prevTape);
   };
 
   const handleSeek = (seconds: number) => {
@@ -269,12 +345,11 @@ export default function Home() {
           volume={volume}
           isMuted={isMuted}
           onStatusChange={setPlaybackStatus}
-          onTimeUpdate={(cur, dur) => {
-            setCurrentTime(cur);
-            setDuration(dur);
-          }}
+          onTimeUpdate={handleTimeUpdate}
           onTrackChange={(trackTitle) => {
-            setCurrentTrackName(trackTitle);
+            if (!loadedCassette?.tracksDetailed || loadedCassette.tracksDetailed.length === 0) {
+              setCurrentTrackName(trackTitle);
+            }
           }}
         />
 
