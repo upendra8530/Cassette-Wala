@@ -105,20 +105,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <div className="relative w-full h-[100svh] min-h-[100svh] max-h-[100svh] overflow-hidden flex flex-col justify-between items-center py-2.5 sm:py-4 px-3 sm:px-6 select-none z-10">
       {/* =========================================================
-          1. TOP GLASSY HEADER BAR (Logo integrated on Left)
+          1. TOP APP-STYLE HEADER BAR (Clean, Prominent Logo)
          ========================================================= */}
       <motion.header
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-6xl flex items-center justify-between gap-2 z-20 shrink-0"
+        className="w-full max-w-6xl flex items-center justify-between gap-3 z-20 shrink-0 px-0.5"
       >
-        {/* Left: Brand Logo & Online Counter */}
+        {/* Left: Prominent Brand Logo & Online Counter */}
         <div className="flex items-center gap-2 xs:gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.png"
             alt="Cassette Wala Logo"
-            className="h-8 xs:h-9 sm:h-11 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] transition-transform duration-200 hover:scale-105"
+            className="h-10 xs:h-12 sm:h-12 md:h-14 w-auto object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] transition-transform duration-200 hover:scale-105"
           />
 
           {/* Online Listeners Pill */}
@@ -133,7 +133,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
         </div>
 
-        {/* Right: Ambient & Action Tweak Pills */}
+        {/* Right: Ambient & Action Tweak Pills (Streamlined on Mobile) */}
         <div className="flex items-center gap-1.5 xs:gap-2">
           {onToggleRain && (
             <button
@@ -141,11 +141,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 soundSynth.playSwitchClick();
                 onToggleRain();
               }}
-              className={`tweak-pill ${isRainActive ? 'active' : ''}`}
+              className={`tweak-pill hidden sm:inline-flex ${isRainActive ? 'active' : ''}`}
               title="Toggle Monsoon Rain"
             >
               <CloudRain className="w-3.5 h-3.5 text-sky-400" />
-              <span className="hidden sm:inline text-xs">Baarish</span>
+              <span className="text-xs">Baarish</span>
             </button>
           )}
 
@@ -155,11 +155,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 soundSynth.playSwitchClick();
                 onToggleTapeHiss();
               }}
-              className={`tweak-pill ${isTapeHissActive ? 'active' : ''}`}
+              className={`tweak-pill hidden sm:inline-flex ${isTapeHissActive ? 'active' : ''}`}
               title="Toggle Tape Hiss"
             >
               <Radio className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline text-xs">Tape Hiss</span>
+              <span className="text-xs">Tape Hiss</span>
             </button>
           )}
 
@@ -169,11 +169,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 soundSynth.playButtonClick();
                 onOpenMixtape();
               }}
-              className="tweak-pill hover:border-amber-400/60 hover:text-amber-200"
+              className="tweak-pill hidden sm:inline-flex hover:border-amber-400/60 hover:text-amber-200"
               title="Create Custom Mixtape"
             >
               <Plus className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline text-xs">+ Mixtape</span>
+              <span className="text-xs">+ Mixtape</span>
             </button>
           )}
 
