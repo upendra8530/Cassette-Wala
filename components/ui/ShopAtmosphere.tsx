@@ -126,7 +126,7 @@ export const ShopAtmosphere: React.FC<ShopAtmosphereProps> = ({
           <img
             src="/cassette-shop-bg.jpg"
             alt="Dubeyji Music Center 1990s Indian Cassette Shop Background Banner"
-            className="w-full h-full object-cover object-center filter brightness-[0.85] contrast-[1.05]"
+            className="w-full h-full object-cover object-top sm:object-center filter brightness-[0.88] contrast-[1.05]"
           />
         </picture>
 
