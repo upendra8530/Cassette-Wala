@@ -1,4 +1,4 @@
-export type Era = '1980s' | '1990s' | '2000s' | 'all';
+export type Era = '1970s' | '1980s' | '1990s' | '2000s' | '1990s - 2000' | 'all';
 
 export type Mood =
   | 'all'
@@ -31,8 +31,8 @@ export interface CassetteData {
   source: string; // e.g. "T-Series Bollywood Classics"
   section_id?: '80s-90s' | '90s-2000s' | string;
   section_title?: string;
-  category?: '1980s' | '1990s' | '2000s' | 'Artist' | 'Mood' | '80s–90s Golden Hits' | '90s–2000s Evergreen Hits' | string;
-  era: '1980s' | '1990s' | '2000s';
+  category?: '1970s' | '1980s' | '1990s' | '2000s' | 'Artist' | 'Mood' | string;
+  era: '1970s' | '1980s' | '1990s' | '2000s' | '1990s - 2000';
   yearRange: string;
   moods: Mood[];
   type?: 'youtube-video' | 'youtube-playlist' | 'video' | 'playlist';

@@ -44,6 +44,8 @@ interface HeroSectionProps {
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   cassette,
+  allCassettes = [],
+  onSelectCassette,
   playbackStatus,
   currentTime,
   duration,
@@ -222,6 +224,34 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 {isPlaying ? 'PLAYING' : 'STOP'}
               </span>
             </div>
+          </div>
+
+          {/* 3 Master Decade Cassette Switcher */}
+          <div className="flex items-center justify-center flex-wrap gap-1.5 sm:gap-2 mt-2">
+            {allCassettes.map((tape) => {
+              const isSelected = cassette?.id === tape.id;
+              return (
+                <button
+                  key={tape.id}
+                  onClick={() => {
+                    soundSynth.playTapeInsert();
+                    onSelectCassette?.(tape);
+                  }}
+                  className={`px-2.5 py-1 sm:px-3.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium transition-all duration-200 border flex items-center gap-1.5 cursor-pointer ${
+                    isSelected
+                      ? 'bg-amber-400 text-black font-bold border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.6)] scale-105'
+                      : 'bg-black/70 text-amber-200/80 border-amber-500/30 hover:border-amber-400 hover:text-white backdrop-blur-md'
+                  }`}
+                  title={tape.title}
+                >
+                  <span>📼</span>
+                  <span>{tape.era}</span>
+                  {tape.trackCount && (
+                    <span className="text-[9px] opacity-75 font-mono">({tape.trackCount})</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </motion.div>
 
