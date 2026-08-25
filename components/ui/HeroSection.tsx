@@ -9,7 +9,6 @@ import {
   SkipForward,
   CloudRain,
   Radio,
-  Plus,
   Heart,
   BookOpen,
   Share2,
@@ -36,7 +35,6 @@ interface HeroSectionProps {
   onVolumeChange: (vol: number) => void;
   onToggleMute: () => void;
   onOpenJCard?: () => void;
-  onOpenMixtape?: () => void;
   onOpenSupport?: () => void;
   isRainActive?: boolean;
   onToggleRain?: () => void;
@@ -56,7 +54,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onPrevious,
   onSeek,
   onOpenJCard,
-  onOpenMixtape,
   onOpenSupport,
   isRainActive = false,
   onToggleRain,
@@ -160,20 +157,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             >
               <Radio className="w-3.5 h-3.5 text-amber-400" />
               <span className="text-xs">Tape Hiss</span>
-            </button>
-          )}
-
-          {onOpenMixtape && (
-            <button
-              onClick={() => {
-                soundSynth.playButtonClick();
-                onOpenMixtape();
-              }}
-              className="tweak-pill hidden sm:inline-flex hover:border-amber-400/60 hover:text-amber-200"
-              title="Create Custom Mixtape"
-            >
-              <Plus className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-xs">+ Mixtape</span>
             </button>
           )}
 

@@ -7,7 +7,6 @@ import { HeroSection } from '@/components/ui/HeroSection';
 import { ShopAtmosphere } from '@/components/ui/ShopAtmosphere';
 import { SupportModal } from '@/components/ui/SupportModal';
 import { JCardModal } from '@/components/cassette/JCardModal';
-import { CustomMixtapeModal } from '@/components/cassette/CustomMixtapeModal';
 import { YouTubePlayer, YouTubePlayerRef } from '@/components/player/YouTubePlayer';
 import { soundSynth } from '@/lib/soundSynth';
 
@@ -29,7 +28,6 @@ export default function Home() {
 
   // 3. Modals
   const [jCardCassette, setJCardCassette] = useState<CassetteData | null>(null);
-  const [isMixtapeModalOpen, setIsMixtapeModalOpen] = useState<boolean>(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
 
   const ytPlayerRef = useRef<YouTubePlayerRef>(null);
@@ -162,11 +160,6 @@ export default function Home() {
     ytPlayerRef.current?.seekTo(seconds);
   };
 
-  const handleCustomMixtapeCreated = (newCassette: CassetteData) => {
-    setCassettes((prev) => [newCassette, ...prev]);
-    handleSelectCassette(newCassette);
-  };
-
   return (
     <main className="relative min-h-screen w-full flex flex-col justify-between overflow-x-hidden">
       {/* Atmospheric Rain & Lightning Engine */}
@@ -193,7 +186,6 @@ export default function Home() {
         onOpenJCard={() => {
           if (loadedCassette) setJCardCassette(loadedCassette);
         }}
-        onOpenMixtape={() => setIsMixtapeModalOpen(true)}
         onOpenSupport={() => setIsSupportModalOpen(true)}
         isRainActive={isRainActive}
         onToggleRain={handleToggleRain}
@@ -222,13 +214,6 @@ export default function Home() {
         isOpen={!!jCardCassette}
         onClose={() => setJCardCassette(null)}
         onPlay={handleSelectCassette}
-      />
-
-      {/* Custom Mixtape Creator Modal */}
-      <CustomMixtapeModal
-        isOpen={isMixtapeModalOpen}
-        onClose={() => setIsMixtapeModalOpen(false)}
-        onMixtapeCreated={handleCustomMixtapeCreated}
       />
 
       {/* Support Us Modal */}
