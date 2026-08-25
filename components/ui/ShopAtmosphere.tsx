@@ -113,16 +113,25 @@ export const ShopAtmosphere: React.FC<ShopAtmosphereProps> = ({
 
   return (
     <>
-      {/* Authentic Indian 1990s Cassette Shop Background Banner (Clearly Visible) */}
+      {/* Authentic Indian 1990s Cassette Shop Background Banner (Responsive Desktop & Mobile) */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#120806]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/cassette-shop-bg.jpg"
-          alt="Dubeyji Music Center 1990s Indian Cassette Shop Background Banner"
-          className="w-full h-full object-cover object-center filter brightness-[0.82] contrast-[1.05]"
-        />
+        <picture className="w-full h-full block">
+          {/* Mobile Screens (< 640px): Dedicated vertical 9:16 portrait banner */}
+          <source
+            media="(max-width: 640px)"
+            srcSet="/cassette-shop-bg-mobile.jpg"
+          />
+          {/* Desktop & Tablets (>= 640px): Wide landscape 16:9 banner */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/cassette-shop-bg.jpg"
+            alt="Dubeyji Music Center 1990s Indian Cassette Shop Background Banner"
+            className="w-full h-full object-cover object-center filter brightness-[0.85] contrast-[1.05]"
+          />
+        </picture>
+
         {/* Subtle top & bottom edge vignette to keep header & music player perfectly readable */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/60 pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_45%,rgba(0,0,0,0.55)_100%)] pointer-events-none" />
       </div>
 
