@@ -2,12 +2,6 @@ import { CassetteData } from '@/lib/types';
 
 export const CASSETTE_SECTIONS = [
   {
-    id: '1970-hits',
-    title: '1970–1979 Playlist',
-    hindiTitle: '१९७० के सदाबहार व रोमांटिक नगमे',
-    description: '1970s Bollywood Golden Era Evergreen & Romantic Hits.',
-  },
-  {
     id: '1980-hits',
     title: '1980–1989 Playlist',
     hindiTitle: '१९८० के सदाबहार सुपरहिट नगमे',
@@ -22,68 +16,7 @@ export const CASSETTE_SECTIONS = [
 ] as const;
 
 export const CASSETTE_PLAYLISTS: CassetteData[] = [
-  // 1. 1970 - 1979 (Evergreen & Romantic)
-  {
-    id: '1970-hits-master',
-    section_id: '1970-hits',
-    section_title: '1970–1979 Playlist',
-    category: '1970s Bollywood',
-    title: 'Cassette Wala — 1970–1979 | Evergreen & Romantic',
-    subtitle: 'Golden Era Evergreen & Romantic (1970–1979)',
-    hindiTitle: '१९७० के सदाबहार व रोमांटिक नगमे',
-    description: 'Continuous playback of 1970–1979 Bollywood golden era romantic & evergreen classics.',
-    source: 'YouTube Playlist',
-    era: '1970s',
-    yearRange: '1970 - 1979',
-    moods: ['all', 'romance', 'safar', 'latenight'],
-    type: 'youtube-playlist',
-    youtubePlaylistId: 'PLgCV-sHZhmPJPm-4DPbNwC3UdonuURgcW',
-    youtube_video_id: '4xcZvqCh-ic',
-    youtubeVideoId: '4xcZvqCh-ic',
-    youtubeId: '4xcZvqCh-ic',
-    youtube_url: 'https://www.youtube.com/playlist?list=PLgCV-sHZhmPJPm-4DPbNwC3UdonuURgcW',
-    youtubeUrl: 'https://www.youtube.com/playlist?list=PLgCV-sHZhmPJPm-4DPbNwC3UdonuURgcW',
-    channel_name: 'Saregama / YRF / Rajshri',
-    channel_url: 'https://www.youtube.com',
-    contains_individual_videos: true,
-    official: true,
-    verified_official: true,
-    trackCount: 100,
-    durationApprox: 'Continuous Playlist',
-    featuredBadge: '1970s GOLDEN C-90',
-    recordLabel: 'HMV / Saregama Golden Classics',
-    priceMRP: '₹ 25.00 (M.R.P. Incl. of all taxes)',
-    jCardNotes: 'Authentic 1970s analog tape recordings mastered with high fidelity Dolby sound.',
-    sideA: [
-      '1. Aane Wala Pal Jaane Wala Hai - Gol Maal',
-      '2. O Saathi Re - Muqaddar Ka Sikandar',
-      '3. Yeh Mera Dil - Don',
-      '4. Tere Bina Jiya Jaye Na - Ghar',
-      '5. Satyam Shivam Sundaram - Title Track',
-      '6. Kya Hua Tera Wada - Hum Kisise Kum Naheen',
-      '7. Kabhi Kabhie Mere Dil Mein - Kabhi Kabhie',
-    ],
-    sideB: [
-      '1. Tere Bina Zindagi Se Koi - Aandhi',
-      '2. Chura Liya Hai Tumne Jo Dil Ko - Yaadon Ki Baaraat',
-      '3. Jai Jai Shiv Shankar - Aap Ki Kasam',
-      '4. Hum Tum Ek Kamre Mein - Bobby',
-      '5. Tere Mere Milan Ki Yeh Raina - Abhimaan',
-      '6. Chingari Koi Bhadke - Amar Prem',
-      '+ 100 Verified Golden Era Classics',
-    ],
-    coverColor: {
-      base: '#78350f',
-      border: '#f59e0b',
-      accent: '#fef3c7',
-      labelBg: '#faf4e6',
-      labelText: '#1c0704',
-      tapeBody: 'smoke',
-      ribbonColor: '#b45309',
-    },
-  },
-
-  // 2. 1980 - 1989 (Evergreen)
+  // 1. 1980 - 1989 (Evergreen)
   {
     id: '1980-hits-master',
     section_id: '1980-hits',
@@ -144,7 +77,7 @@ export const CASSETTE_PLAYLISTS: CassetteData[] = [
     },
   },
 
-  // 3. 1990s - 2000 (66 Songs Only — Evergreen & Romantic)
+  // 2. 1990s - 2000 (66 Songs Only — Evergreen & Romantic)
   {
     id: '1990-hits-master',
     section_id: '1990-hits',
@@ -211,10 +144,10 @@ export const ERA_FILTERS = [
     id: 'all',
     label: 'All Decades',
     tagline: 'सुनहरा सफर',
-    years: '1970 - 2000',
+    years: '1980 - 2000',
     icon: '📼',
     color: '#f59e0b',
-    description: 'Complete Bollywood Golden & Romantic Eras.',
+    description: 'Complete Bollywood Evergreen & Romantic Eras.',
   },
 ] as const;
 
