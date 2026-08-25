@@ -139,7 +139,7 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
     useEffect(() => {
       if (!isApiReady || !containerRef.current || isReady) return;
 
-      const initialPlaylistId = cassette?.youtubePlaylistId || 'PLUidBbOgoG6A';
+      const initialPlaylistId = cassette?.youtubePlaylistId || 'PLcapRHvIb19A';
       activePlaylistIdRef.current = initialPlaylistId;
 
       try {
@@ -220,32 +220,48 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
       };
     }, [isApiReady, isReady, startTimeTracking, stopTimeTracking, syncTrackInfo, cassette?.youtubePlaylistId]);
 
-    // 4. Handle Cassette Playlist Switching
+    // 4. Forceful Cassette Playlist Switching
     useEffect(() => {
       const player = playerRef.current;
       if (!player || !isReady || !cassette) return;
 
-      const targetPlaylistId = cassette.youtubePlaylistId || 'PLUidBbOgoG6A';
+      const targetPlaylistId = cassette.youtubePlaylistId || 'PLcapRHvIb19A';
       if (activePlaylistIdRef.current === targetPlaylistId) return;
       activePlaylistIdRef.current = targetPlaylistId;
 
       try {
+        // 1. Force stop existing audio buffer
+        if (typeof player.stopVideo === 'function') {
+          player.stopVideo();
+        }
+
+        // 2. Load or Cue the target playlist from index 0
         if (isPlaying) {
           player.loadPlaylist({
             list: targetPlaylistId,
             listType: 'playlist',
             index: 0,
+            startSeconds: 0,
           });
+          if (typeof player.playVideoAt === 'function') {
+            setTimeout(() => {
+              try {
+                player.playVideoAt(0);
+              } catch {}
+            }, 250);
+          }
         } else {
           player.cuePlaylist({
             list: targetPlaylistId,
             listType: 'playlist',
             index: 0,
+            startSeconds: 0,
           });
         }
-        setTimeout(syncTrackInfo, 600);
+
+        setTimeout(syncTrackInfo, 500);
       } catch (e) {
-        console.warn('Error loading cassette playlist:', e);
+        console.warn('Error switching cassette playlist:', e);
       }
     }, [cassette?.id, cassette?.youtubePlaylistId, isReady, isPlaying, syncTrackInfo]);
 
@@ -290,7 +306,6 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
           if (!player) return;
           const state = typeof player.getPlayerState === 'function' ? player.getPlayerState() : -1;
           if (state === 5 || state === -1) {
-            // If cued, start playing immediately
             if (typeof player.playVideoAt === 'function') {
               player.playVideoAt(0);
             } else {
