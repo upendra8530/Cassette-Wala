@@ -50,6 +50,21 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
     const [isReady, setIsReady] = useState(false);
     const activeCassetteIdRef = useRef<string | null>(null);
 
+    // Keep latest props in refs to prevent player re-initialization
+    const onStatusChangeRef = useRef(onStatusChange);
+    const onTimeUpdateRef = useRef(onTimeUpdate);
+    const onTrackChangeRef = useRef(onTrackChange);
+    const isMutedRef = useRef(isMuted);
+    const volumeRef = useRef(volume);
+
+    useEffect(() => {
+      onStatusChangeRef.current = onStatusChange;
+      onTimeUpdateRef.current = onTimeUpdate;
+      onTrackChangeRef.current = onTrackChange;
+      isMutedRef.current = isMuted;
+      volumeRef.current = volume;
+    });
+
     // 1. Load YouTube IFrame API
     useEffect(() => {
       if (typeof window === 'undefined') return;
@@ -97,13 +112,13 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
           try {
             const cur = player.getCurrentTime() || 0;
             const dur = player.getDuration() || 0;
-            onTimeUpdate(cur, dur);
+            onTimeUpdateRef.current(cur, dur);
 
             if (typeof player.getVideoData === 'function') {
               const data = player.getVideoData();
-              if (data && data.title && onTrackChange) {
+              if (data && data.title && onTrackChangeRef.current) {
                 const idx = typeof player.getPlaylistIndex === 'function' ? player.getPlaylistIndex() : 0;
-                onTrackChange(data.title, idx);
+                onTrackChangeRef.current(data.title, idx);
               }
             }
           } catch {
@@ -111,24 +126,21 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
           }
         }
       }, 400);
-    }, [onTimeUpdate, onTrackChange, stopTimeTracking]);
+    }, [stopTimeTracking]);
 
-    // 3. Initialize Player
+    // 3. Initialize Player (Strictly Autoplay Disabled)
     useEffect(() => {
       if (!isApiReady || !containerRef.current || isReady) return;
 
-      const initialVideoId =
-        cassette?.youtube_video_id ||
-        cassette?.youtubeVideoId ||
-        cassette?.youtubeId ||
-        'kYv9iD09Sg4';
+      const playlistId = cassette?.youtubePlaylistId || 'PLUidBbOgoG6A';
 
       try {
         playerRef.current = new window.YT.Player(containerRef.current, {
           height: '200',
           width: '200',
-          videoId: initialVideoId,
           playerVars: {
+            listType: 'playlist',
+            list: playlistId,
             autoplay: 0,
             controls: 0,
             disablekb: 1,
@@ -144,8 +156,18 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
             onReady: (e: any) => {
               setIsReady(true);
               try {
-                e.target.setVolume(volume);
-                if (isMuted) e.target.mute();
+                e.target.setVolume(volumeRef.current);
+                if (isMutedRef.current) e.target.mute();
+                // Cue the playlist without playing automatically
+                e.target.cuePlaylist({
+                  list: playlistId,
+                  listType: 'playlist',
+                  index: 0,
+                });
+                const data = e.target.getVideoData?.();
+                if (data?.title && onTrackChangeRef.current) {
+                  onTrackChangeRef.current(data.title, 0);
+                }
               } catch {}
             },
             onStateChange: (e: any) => {
@@ -154,6 +176,13 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
               if (state === 1) {
                 status = 'playing';
                 startTimeTracking();
+                try {
+                  const data = e.target.getVideoData?.();
+                  const idx = e.target.getPlaylistIndex?.() ?? 0;
+                  if (data?.title && onTrackChangeRef.current) {
+                    onTrackChangeRef.current(data.title, idx);
+                  }
+                } catch {}
               } else if (state === 2) {
                 status = 'paused';
                 stopTimeTracking();
@@ -162,17 +191,20 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
               } else if (state === 0) {
                 status = 'ended';
                 stopTimeTracking();
+                // Auto advance to next song in playlist
+                try {
+                  e.target.nextVideo();
+                } catch {}
               } else if (state === 5) {
                 status = 'cued';
               }
-              onStatusChange(status);
+              onStatusChangeRef.current(status);
             },
             onError: (err: any) => {
               console.warn('YouTube Player Error code:', err?.data);
-              // Fallback to verified superhit video if specific video fails
               try {
-                if (playerRef.current) {
-                  playerRef.current.loadVideoById('ePSzjF0WzSg');
+                if (playerRef.current && typeof playerRef.current.nextVideo === 'function') {
+                  playerRef.current.nextVideo();
                 }
               } catch {}
             },
@@ -185,9 +217,9 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
       return () => {
         stopTimeTracking();
       };
-    }, [isApiReady, isReady, volume, isMuted, onStatusChange, startTimeTracking, stopTimeTracking]);
+    }, [isApiReady, isReady, startTimeTracking, stopTimeTracking, cassette?.youtubePlaylistId]);
 
-    // 4. Load New Cassette Video / Playlist
+    // 4. Load Playlist or Video when cassette changes
     useEffect(() => {
       const player = playerRef.current;
       if (!player || !isReady || !cassette) return;
@@ -196,21 +228,22 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
       activeCassetteIdRef.current = cassette.id;
 
       try {
-        if (
-          (cassette.type === 'playlist' || cassette.type === 'youtube-playlist') &&
-          cassette.youtubePlaylistId
-        ) {
-          player.loadPlaylist({
-            list: cassette.youtubePlaylistId,
-            listType: 'playlist',
-            index: 0,
-          });
-        } else {
-          const videoIdToLoad =
-            cassette.youtube_video_id ||
-            cassette.youtubeVideoId ||
-            cassette.youtubeId ||
-            'kYv9iD09Sg4';
+        if (cassette.youtubePlaylistId) {
+          if (isPlaying) {
+            player.loadPlaylist({
+              list: cassette.youtubePlaylistId,
+              listType: 'playlist',
+              index: 0,
+            });
+          } else {
+            player.cuePlaylist({
+              list: cassette.youtubePlaylistId,
+              listType: 'playlist',
+              index: 0,
+            });
+          }
+        } else if (cassette.youtube_video_id || cassette.youtubeVideoId) {
+          const videoIdToLoad = cassette.youtube_video_id || cassette.youtubeVideoId || 'ODu7OyAqK-Q';
           if (isPlaying) {
             player.loadVideoById({ videoId: videoIdToLoad });
           } else {
@@ -222,7 +255,7 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
       }
     }, [cassette, isReady, isPlaying]);
 
-    // 5. Play / Pause Control
+    // 5. Play / Pause Control (Only plays when isPlaying is explicitly true)
     useEffect(() => {
       const player = playerRef.current;
       if (!player || !isReady) return;
@@ -273,7 +306,7 @@ export const YouTubePlayer = React.forwardRef<YouTubePlayerRef, YouTubePlayerPro
         try {
           playerRef.current?.stopVideo();
           stopTimeTracking();
-          onTimeUpdate(0, 0);
+          onTimeUpdateRef.current(0, 0);
         } catch {}
       },
       next: () => {

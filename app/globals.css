@@ -243,6 +243,36 @@ body {
   transform: scale(1.1);
 }
 
+@media (max-width: 640px) {
+  .music-player {
+    padding: 10px 14px;
+    gap: 10px;
+    border-radius: 22px;
+  }
+  .music-cover-frame {
+    width: 44px;
+    height: 44px;
+  }
+  .play-button {
+    width: 38px;
+    height: 38px;
+  }
+  .icon-button {
+    width: 30px;
+    height: 30px;
+  }
+  .tweak-pill {
+    padding: 0 8px;
+    height: 30px;
+    min-height: 30px;
+    font-size: 10.5px;
+  }
+  .header-pill {
+    height: 32px;
+    font-size: 10.5px;
+  }
+}
+
 /* Rain Canvas & Lightning Flash */
 #rainCanvas {
   position: fixed;

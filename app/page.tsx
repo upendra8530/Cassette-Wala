@@ -5,7 +5,6 @@ import { CASSETTE_PLAYLISTS } from '@/data/playlists';
 import { CassetteData, PlaybackStatus } from '@/lib/types';
 import { HeroSection } from '@/components/ui/HeroSection';
 import { ShopAtmosphere } from '@/components/ui/ShopAtmosphere';
-import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { SupportModal } from '@/components/ui/SupportModal';
 import { JCardModal } from '@/components/cassette/JCardModal';
 import { CustomMixtapeModal } from '@/components/cassette/CustomMixtapeModal';
@@ -14,14 +13,13 @@ import { soundSynth } from '@/lib/soundSynth';
 
 export default function Home() {
   // 1. Core State
-  const [isLoading, setIsLoading] = useState(true);
   const [cassettes, setCassettes] = useState<CassetteData[]>(CASSETTE_PLAYLISTS);
   const [loadedCassette, setLoadedCassette] = useState<CassetteData | null>(CASSETTE_PLAYLISTS[0]);
   const [playbackStatus, setPlaybackStatus] = useState<PlaybackStatus>('unstarted');
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(0);
-  const [currentTrackName, setCurrentTrackName] = useState<string>('');
+  const [currentTrackName, setCurrentTrackName] = useState<string>('Pehla Nasha');
   const [volume, setVolume] = useState<number>(100);
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
@@ -58,26 +56,10 @@ export default function Home() {
     });
   };
 
-  // 6. Synchronize current track name with elapsed time
+  // 6. Synchronize time
   const handleTimeUpdate = (cur: number, dur: number) => {
     setCurrentTime(cur);
     setDuration(dur);
-
-    if (loadedCassette?.tracksDetailed && loadedCassette.tracksDetailed.length > 0) {
-      const tracks = loadedCassette.tracksDetailed;
-      let activeIdx = 0;
-      for (let i = 0; i < tracks.length; i++) {
-        if (cur >= (tracks[i].timestampSeconds || 0)) {
-          activeIdx = i;
-        } else {
-          break;
-        }
-      }
-      if (activeIdx !== currentTrackIndex) {
-        setCurrentTrackIndex(activeIdx);
-        setCurrentTrackName(tracks[activeIdx].title);
-      }
-    }
   };
 
   // 7. Keyboard Shortcuts
@@ -159,64 +141,19 @@ export default function Home() {
     ytPlayerRef.current?.pause();
   };
 
-  // Next Track / Repeat / Next Cassette
+  // Next Track in Playlist
   const handleNext = () => {
     soundSynth.playRewindWhoosh();
-
-    if (loadedCassette?.tracksDetailed && currentTrackIndex + 1 < loadedCassette.tracksDetailed.length) {
-      const nextIdx = currentTrackIndex + 1;
-      const nextTrack = loadedCassette.tracksDetailed[nextIdx];
-      setCurrentTrackIndex(nextIdx);
-      setCurrentTrackName(nextTrack.title);
-      ytPlayerRef.current?.seekTo(nextTrack.timestampSeconds || 0);
-      return;
-    }
-
-    if (loadedCassette?.type === 'youtube-playlist') {
-      ytPlayerRef.current?.next();
-      return;
-    }
-
-    if (cassettes.length > 1) {
-      const curIdx = cassettes.findIndex((c) => c.id === loadedCassette?.id);
-      const nextTape = cassettes[(curIdx + 1) % cassettes.length];
-      handleSelectCassette(nextTape);
-    } else {
-      // Replay track
-      ytPlayerRef.current?.seekTo(0);
-    }
+    ytPlayerRef.current?.next();
   };
 
-  // Previous Track
+  // Previous Track in Playlist
   const handlePrevious = () => {
     soundSynth.playRewindWhoosh();
-
-    const currentTrackStart = loadedCassette?.tracksDetailed?.[currentTrackIndex]?.timestampSeconds || 0;
-    if (currentTime > currentTrackStart + 5) {
-      ytPlayerRef.current?.seekTo(currentTrackStart);
-      return;
-    }
-
-    if (loadedCassette?.tracksDetailed && currentTrackIndex > 0) {
-      const prevIdx = currentTrackIndex - 1;
-      const prevTrack = loadedCassette.tracksDetailed[prevIdx];
-      setCurrentTrackIndex(prevIdx);
-      setCurrentTrackName(prevTrack.title);
-      ytPlayerRef.current?.seekTo(prevTrack.timestampSeconds || 0);
-      return;
-    }
-
-    if (loadedCassette?.type === 'youtube-playlist') {
-      ytPlayerRef.current?.previous();
-      return;
-    }
-
-    if (cassettes.length > 1) {
-      const curIdx = cassettes.findIndex((c) => c.id === loadedCassette?.id);
-      const prevTape = cassettes[(curIdx - 1 + cassettes.length) % cassettes.length];
-      handleSelectCassette(prevTape);
-    } else {
+    if (currentTime > 5) {
       ytPlayerRef.current?.seekTo(0);
+    } else {
+      ytPlayerRef.current?.previous();
     }
   };
 
@@ -232,11 +169,6 @@ export default function Home() {
 
   return (
     <main className="relative min-h-screen w-full flex flex-col justify-between overflow-x-hidden">
-      {/* Intro Loading Screen */}
-      {isLoading && (
-        <LoadingScreen onComplete={() => setIsLoading(false)} />
-      )}
-
       {/* Atmospheric Rain & Lightning Engine */}
       <ShopAtmosphere isRainActive={isRainActive} />
 
@@ -278,10 +210,9 @@ export default function Home() {
         isMuted={isMuted}
         onStatusChange={setPlaybackStatus}
         onTimeUpdate={handleTimeUpdate}
-        onTrackChange={(trackTitle) => {
-          if (!loadedCassette?.tracksDetailed || loadedCassette.tracksDetailed.length === 0) {
-            setCurrentTrackName(trackTitle);
-          }
+        onTrackChange={(trackTitle, trackIdx) => {
+          setCurrentTrackIndex(trackIdx);
+          setCurrentTrackName(trackTitle);
         }}
       />
 

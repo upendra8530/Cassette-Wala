@@ -62,15 +62,16 @@ export const metadata: Metadata = {
   authors: [{ name: 'Cassette Wala' }],
   icons: {
     icon: [
-      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.png', type: 'image/png' },
       { url: '/icon.png', sizes: '192x192', type: 'image/png' },
       { url: '/logo.png', sizes: '512x512', type: 'image/png' },
     ],
     apple: [
-      { url: '/favicon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/apple-icon.png', sizes: '192x192', type: 'image/png' },
       { url: '/logo.png', sizes: '512x512', type: 'image/png' },
     ],
-    shortcut: '/favicon-32.png',
+    shortcut: '/favicon.ico',
   },
   openGraph: {
     title: 'Cassette Wala | Rewind. Play. Relive.',

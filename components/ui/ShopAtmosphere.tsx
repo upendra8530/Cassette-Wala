@@ -79,7 +79,7 @@ export const ShopAtmosphere: React.FC<ShopAtmosphereProps> = ({
       ctx.clearRect(0, 0, width, height);
 
       if (isRainActive) {
-        ctx.strokeStyle = 'rgba(186, 230, 253, 0.45)';
+        ctx.strokeStyle = 'rgba(186, 230, 253, 0.5)';
         ctx.lineWidth = 1.2;
         ctx.lineCap = 'round';
 
@@ -113,6 +113,19 @@ export const ShopAtmosphere: React.FC<ShopAtmosphereProps> = ({
 
   return (
     <>
+      {/* Authentic Indian 1990s Cassette Shop Background Banner (Clearly Visible) */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#120806]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/cassette-shop-bg.jpg"
+          alt="Dubeyji Music Center 1990s Indian Cassette Shop Background Banner"
+          className="w-full h-full object-cover object-center filter brightness-[0.82] contrast-[1.05]"
+        />
+        {/* Subtle top & bottom edge vignette to keep header & music player perfectly readable */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_45%,rgba(0,0,0,0.55)_100%)] pointer-events-none" />
+      </div>
+
       {/* Rain canvas */}
       <canvas
         ref={rainCanvasRef}
@@ -123,8 +136,8 @@ export const ShopAtmosphere: React.FC<ShopAtmosphereProps> = ({
       {/* Lightning screen flash */}
       <div ref={flashOverlayRef} id="lightningFlashOverlay" />
 
-      {/* Subtle warm paper texture */}
-      <div className="pointer-events-none fixed inset-0 z-10 opacity-15 mix-blend-overlay bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:24px_24px]" />
+      {/* Subtle warm analog grain */}
+      <div className="pointer-events-none fixed inset-0 z-[1] opacity-15 mix-blend-overlay bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:24px_24px]" />
     </>
   );
 };
