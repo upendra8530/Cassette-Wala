@@ -198,9 +198,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           transition={{ duration: 0.4 }}
           className="flex flex-col items-center justify-center mb-2"
         >
-          {/* Hindi Tagline */}
+          {/* Hindi Title & Tagline reflecting active cassette */}
           <p className="font-hindi text-base sm:text-xl text-amber-300 font-bold text-center tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-            &ldquo;हर कैसेट में एक याद है&rdquo;
+            {cassette?.hindiTitle || '&ldquo;हर कैसेट में एक याद है&rdquo;'}
           </p>
 
           {/* Mini Analog Tape Index Bar */}
@@ -224,12 +224,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 {isPlaying ? 'PLAYING' : 'STOP'}
               </span>
             </div>
+            <span className="text-white/30">•</span>
+            <span className="text-amber-300/80 font-semibold text-[9px] uppercase tracking-wider">
+              {cassette?.featuredBadge || 'STEREO'}
+            </span>
           </div>
 
-          {/* 3 Master Decade Cassette Switcher */}
-          <div className="flex items-center justify-center flex-wrap gap-1.5 sm:gap-2 mt-2">
+          {/* Master Decade Cassette Switcher */}
+          <div className="flex items-center justify-center flex-wrap gap-2 sm:gap-3 mt-2.5">
             {allCassettes.map((tape) => {
               const isSelected = cassette?.id === tape.id;
+              const is80s = tape.era === '1980s';
               return (
                 <button
                   key={tape.id}
@@ -237,17 +242,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     soundSynth.playTapeInsert();
                     onSelectCassette?.(tape);
                   }}
-                  className={`px-2.5 py-1 sm:px-3.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium transition-all duration-200 border flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-3 py-1.5 sm:px-4 sm:py-1.5 rounded-full text-xs font-semibold transition-all duration-200 border flex items-center gap-2 cursor-pointer ${
                     isSelected
-                      ? 'bg-amber-400 text-black font-bold border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.6)] scale-105'
-                      : 'bg-black/70 text-amber-200/80 border-amber-500/30 hover:border-amber-400 hover:text-white backdrop-blur-md'
+                      ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-black font-extrabold border-amber-200 shadow-[0_0_16px_rgba(251,191,36,0.7)] scale-105'
+                      : 'bg-black/75 text-amber-200/90 border-amber-500/30 hover:border-amber-400 hover:text-white backdrop-blur-md'
                   }`}
                   title={tape.title}
                 >
-                  <span>📼</span>
-                  <span>{tape.era}</span>
+                  <span className="text-sm">📼</span>
+                  <span>{is80s ? '1980–1989 Evergreen' : '1990s - 2000 Romantic'}</span>
                   {tape.trackCount && (
-                    <span className="text-[9px] opacity-75 font-mono">({tape.trackCount})</span>
+                    <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-black/20 text-black font-bold' : 'bg-amber-400/20 text-amber-300'}`}>
+                      {tape.trackCount}
+                    </span>
                   )}
                 </button>
               );
